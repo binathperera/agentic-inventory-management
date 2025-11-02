@@ -1,0 +1,33 @@
+package com.inventory.management.dto;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
+import lombok.Data;
+
+import java.math.BigDecimal;
+
+@Data
+public class ProductRequest {
+    
+    @NotBlank(message = "Product name is required")
+    private String name;
+    
+    private String description;
+    
+    @NotBlank(message = "SKU is required")
+    private String sku;
+    
+    @NotNull(message = "Price is required")
+    @Positive(message = "Price must be positive")
+    private BigDecimal price;
+    
+    @NotNull(message = "Quantity is required")
+    @PositiveOrZero(message = "Quantity must be zero or positive")
+    private Integer quantity;
+    
+    private String category;
+    
+    private String supplier;
+}
