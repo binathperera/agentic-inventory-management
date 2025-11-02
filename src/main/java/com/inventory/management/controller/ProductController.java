@@ -1,6 +1,7 @@
 package com.inventory.management.controller;
 
 import com.inventory.management.dto.ProductRequest;
+import com.inventory.management.dto.StockUpdateRequest;
 import com.inventory.management.model.Product;
 import com.inventory.management.service.ProductService;
 import jakarta.validation.Valid;
@@ -69,8 +70,7 @@ public class ProductController {
     @PatchMapping("/{id}/stock")
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
     public ResponseEntity<Product> updateStock(@PathVariable String id, 
-                                                 @RequestBody Map<String, Integer> request) {
-        Integer quantity = request.get("quantity");
-        return ResponseEntity.ok(productService.updateStock(id, quantity));
+                                                 @Valid @RequestBody StockUpdateRequest request) {
+        return ResponseEntity.ok(productService.updateStock(id, request.getQuantity()));
     }
 }

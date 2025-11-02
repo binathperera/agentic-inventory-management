@@ -60,6 +60,7 @@ public class ProductService {
     public Product updateProduct(String id, ProductRequest productRequest) {
         Product product = getProductById(id);
         
+        // Note: SKU is immutable and cannot be changed after product creation
         product.setName(productRequest.getName());
         product.setDescription(productRequest.getDescription());
         product.setPrice(productRequest.getPrice());
