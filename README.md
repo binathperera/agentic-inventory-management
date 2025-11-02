@@ -36,22 +36,33 @@ git clone https://github.com/binathperera/agentic-inventory-management.git
 cd agentic-inventory-management
 ```
 
-2. Configure MongoDB connection in `src/main/resources/application.properties`:
+2. Start MongoDB using Docker Compose:
+```bash
+docker-compose up -d
+```
+
+Alternatively, install and run MongoDB locally or use a cloud MongoDB instance.
+
+3. Configure MongoDB connection in `src/main/resources/application.properties` if needed:
 ```properties
 spring.data.mongodb.uri=mongodb://localhost:27017/inventory_db
 ```
 
-3. Build the project:
+4. Build the project:
 ```bash
 mvn clean install
 ```
 
-4. Run the application:
+5. Run the application:
 ```bash
 mvn spring-boot:run
 ```
 
 The application will start on `http://localhost:8080`
+
+## Quick Start
+
+See [API_EXAMPLES.md](API_EXAMPLES.md) for detailed curl command examples to test all endpoints.
 
 ## API Endpoints
 
