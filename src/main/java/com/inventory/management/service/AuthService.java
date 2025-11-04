@@ -57,13 +57,13 @@ public class AuthService {
         return new JwtResponse(jwt, userDetails.getUsername(), user.getEmail(), roles);
     }
 
-    public MessageResponse registerUser(SignupRequest signupRequest) {
+    public JwtResponse registerUser(SignupRequest signupRequest) {
         if (userRepository.existsByUsername(signupRequest.getUsername())) {
-            return new MessageResponse("Error: Username is already taken!");
+            return new JwtResponse("Error: Username is already taken!");
         }
 
         if (userRepository.existsByEmail(signupRequest.getEmail())) {
-            return new MessageResponse("Error: Email is already in use!");
+            return new JwtResponse("Error: Email is already in use!");
         }
 
         User user = new User();
@@ -82,6 +82,11 @@ public class AuthService {
 
         userRepository.save(user);
 
-        return new MessageResponse("User registered successfully!");
+        // Automatically authenticate the user after successful registration
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setUsername(signupRequest.getUsername());
+        loginRequest.setPassword(signupRequest.getPassword());
+
+        return authenticateUser(loginRequest);  
     }
 }

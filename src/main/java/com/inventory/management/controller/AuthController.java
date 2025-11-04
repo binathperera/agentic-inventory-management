@@ -25,8 +25,8 @@ public class AuthController {
     }
     
     @PostMapping("/register")
-    public ResponseEntity<MessageResponse> registerUser(@Valid @RequestBody SignupRequest signupRequest) {
-        MessageResponse messageResponse = authService.registerUser(signupRequest);
-        return ResponseEntity.ok(messageResponse);
+    public ResponseEntity<JwtResponse> registerUser(@Valid @RequestBody SignupRequest signupRequest) {
+        JwtResponse jwtResponse = authService.registerUser(signupRequest);
+        return ResponseEntity.ok(jwtResponse);
     }
 }
