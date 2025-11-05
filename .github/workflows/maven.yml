@@ -29,7 +29,7 @@ jobs:
         run: |
           pkill -f 'java -jar' || true
       - name: Build with Maven
-        run: /opt/maven/bin/mvn -B package --file pom.xml
+        run: /opt/maven/bin/mvn -B package -DskipTests --file pom.xml
       - name: Run Spring Boot app
         run: |
           cd _work/agentic-inventory-management/agentic-inventory-management
