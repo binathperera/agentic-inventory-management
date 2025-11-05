@@ -32,6 +32,7 @@ jobs:
         run: /opt/maven/bin/mvn -B package -DskipTests --file pom.xml
       - name: Run Spring Boot app
         run: |
+          cd /home/ec2-user/_work/agentic-inventory-management/agentic-inventory-management
           nohup java -jar target/*.jar > app.log 2>&1 &
 
       # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
