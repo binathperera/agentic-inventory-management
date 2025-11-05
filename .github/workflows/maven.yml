@@ -30,8 +30,7 @@ jobs:
       - name: Re deploy Spring Boot app
         run: |
           cd /home/ec2-user/spring/_work/agentic-inventory-management/agentic-inventory-management
-          tmux kill-session -t spring || true
-          tmux new -d -s spring "java -jar target/*.jar > app.log 2>&1"
+          RUNNER_TRACKING_ID="" && sudo -E java $JAVA_HOME/bin/java -jar inventory-management-1.0.0.jar
 
       # Optional: Uploads the full dependency graph to GitHub to improve the quality of Dependabot alerts this repository can receive
       #- name: Update dependency graph
