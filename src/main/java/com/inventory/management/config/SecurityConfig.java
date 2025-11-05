@@ -1,6 +1,9 @@
 package com.inventory.management.config;
 
 import com.inventory.management.security.JwtAuthenticationFilter;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -88,4 +91,5 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+    
 }
