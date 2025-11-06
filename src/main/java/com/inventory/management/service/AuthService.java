@@ -51,9 +51,11 @@ public class AuthService {
                 .map(role -> role.replace("ROLE_", ""))
                 .collect(Collectors.toList());
 
-        User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
+        User user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow();
+        // if user not found, return error message
+        if (user == null) {
+            return new JwtResponse("Error: User not found!");
+        }
         return new JwtResponse(jwt, userDetails.getUsername(), user.getEmail(), roles);
     }
 
@@ -87,6 +89,6 @@ public class AuthService {
         loginRequest.setUsername(signupRequest.getUsername());
         loginRequest.setPassword(signupRequest.getPassword());
 
-        return authenticateUser(loginRequest);  
+        return authenticateUser(loginRequest);
     }
 }
