@@ -83,7 +83,8 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
 
         // 🔒 Use explicit origin — "*" will fail if you use credentials or auth headers
-        configuration.setAllowedOrigins(List.of(clientUrl));
+        // configuration.setAllowedOrigins(List.of(clientUrl));
+        configuration.setAllowedOrigins(List.of("*"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
