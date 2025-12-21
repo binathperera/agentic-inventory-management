@@ -1,6 +1,7 @@
 package com.inventory.management.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.inventory.management.model.Supplier;
 import com.inventory.management.repository.SupplierRepository;
@@ -14,8 +15,8 @@ public class SupplierController {
     private SupplierRepository supplierRepository;
 
     @GetMapping
-    public List<Supplier> getAllSuppliers() {
-        return supplierRepository.findAll();
+    public ResponseEntity<List<Supplier>> getAllSuppliers() {
+        return ResponseEntity.ok(supplierRepository.findAll());
     }
 
     @GetMapping("/{id}")
@@ -39,4 +40,3 @@ public class SupplierController {
         supplierRepository.deleteById(id);
     }
 }
-

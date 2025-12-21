@@ -19,23 +19,24 @@ public class Supplier {
         this.contact = contact;
         this.address = address;
     }
-    
-    public String getSupplierID(){
+
+    public String getSupplierId() {
         return supplierId;
     }
-    public String getSupplierName() {
+
+    public String getName() {
         return name;
     }
 
-    public String getSupplierEmail() {
+    public String getEmail() {
         return email;
     }
 
-    public String getSupplierContact() {
+    public String getContact() {
         return contact;
     }
 
-    public String getSupplierAddress() {
+    public String getAddress() {
         return address;
     }
 
