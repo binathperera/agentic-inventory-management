@@ -50,7 +50,6 @@ public class ProductService {
         product.setPrice(productRequest.getPrice());
         product.setQuantity(productRequest.getQuantity());
         product.setCategory(productRequest.getCategory());
-        product.setSupplier(productRequest.getSupplier());
         product.setCreatedAt(LocalDateTime.now());
         product.setUpdatedAt(LocalDateTime.now());
         
@@ -66,7 +65,6 @@ public class ProductService {
         product.setPrice(productRequest.getPrice());
         product.setQuantity(productRequest.getQuantity());
         product.setCategory(productRequest.getCategory());
-        product.setSupplier(productRequest.getSupplier());
         product.setUpdatedAt(LocalDateTime.now());
         
         return productRepository.save(product);
