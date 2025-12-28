@@ -10,11 +10,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+import com.inventory.management.config.TenantContext;
+import com.inventory.management.service.TenantService;
+import com.inventory.management.service.UserDetailsServiceImpl;
 
 import java.io.IOException;
 
@@ -27,17 +30,35 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private JwtUtils jwtUtils;
 
     @Autowired
-    private UserDetailsService userDetailsService;
+    private UserDetailsServiceImpl userDetailsServiceImpl;
+
+    @Autowired
+    private TenantService tenantService;
+
+    private String extractSubdomain(HttpServletRequest request) {
+        String host = request.getHeader("Host");
+        if (host != null && host.contains(".")) {
+            return host.split("\\.")[0];
+        }
+        return null;
+    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         try {
             String jwt = parseJwt(request);
+            // 1. ALWAYS resolve tenant from Subdomain first (for Login & API calls)
+            if (jwt == null || !jwtUtils.validateJwtToken(jwt)) {
+                String subdomain = extractSubdomain(request);
+                String tenantId = tenantService.getTenantIdBySubDomain(subdomain);
+                TenantContext.setTenantId(tenantId);
+            }
             if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
                 String username = jwtUtils.getUserNameFromJwtToken(jwt);
-
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                String tenantId = jwtUtils.getTenantIdFromJwtToken(jwt);
+                
+                UserDetails userDetails = userDetailsServiceImpl.loadUserByTenantIdAndUsername(tenantId, username);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));

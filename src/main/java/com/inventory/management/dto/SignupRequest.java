@@ -7,6 +7,8 @@ import lombok.Data;
 
 import java.util.Set;
 
+import com.inventory.management.model.Role;
+
 @Data
 public class SignupRequest {
 
@@ -22,5 +24,5 @@ public class SignupRequest {
     @Size(min = 6, message = "Password must be at least 6 characters")
     private String password;
 
-    private Set<String> roles;
+    private Set<Role> roles;
 }

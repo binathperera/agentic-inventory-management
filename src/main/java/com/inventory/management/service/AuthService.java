@@ -1,5 +1,6 @@
 package com.inventory.management.service;
 
+import com.inventory.management.config.TenantContext;
 import com.inventory.management.dto.JwtResponse;
 import com.inventory.management.dto.LoginRequest;
 import com.inventory.management.dto.SignupRequest;
@@ -13,12 +14,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import com.inventory.management.model.Role;
 
 @Service
 public class AuthService {
@@ -47,8 +50,13 @@ public class AuthService {
                 .map(GrantedAuthority::getAuthority)
                 .map(role -> role.replace("ROLE_", ""))
                 .collect(Collectors.toList());
-
-        User user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow();
+            
+        // 1. Grab the tenant_id resolved from the subdomain by your Filter
+        String tenantId = TenantContext.getTenantId();
+        if (tenantId == null) {
+            throw new UsernameNotFoundException("Access denied: No tenant identified.");
+        }
+        User user = userRepository.findByUsernameAndTenant_id(userDetails.getUsername(), tenantId).orElseThrow();
         // if user not found, return error message
         if (user == null) {
             return new JwtResponse("Error: User not found!");
@@ -69,14 +77,13 @@ public class AuthService {
         user.setUsername(signupRequest.getUsername());
         user.setEmail(signupRequest.getEmail());
         user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
-
-        Set<String> roles = signupRequest.getRoles();
+        
+        Set<Role> roles = signupRequest.getRoles();
         if (roles == null || roles.isEmpty()) {
             roles = new HashSet<>();
-            roles.add("USER");
+            roles.add(new Role("ROLE_USER", "Default role", 1, null));
         }
         user.setRoles(roles);
-
         User u = userRepository.save(user);
 
         // Automatically authenticate the user after successful registration

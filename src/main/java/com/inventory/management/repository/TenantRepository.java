@@ -7,4 +7,5 @@ import com.inventory.management.model.Tenant;
 @Repository
 public interface TenantRepository extends MongoRepository<Tenant, String> {
 
+    java.util.Optional<Tenant> findBySub_domain(String sub_domain);
 }
