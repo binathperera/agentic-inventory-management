@@ -182,4 +182,4 @@ src/
 
 ## License
 
-MIT License — see [LICENSE](LICENSE)
+Apache License — see [LICENSE](LICENSE)
