@@ -7,8 +7,6 @@ import lombok.Data;
 
 import java.util.Set;
 
-import com.inventory.management.model.Role;
-
 @Data
 public class SignupRequest {
 

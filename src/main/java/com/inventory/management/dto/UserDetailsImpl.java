@@ -1,6 +1,8 @@
-package com.inventory.management.model;
+package com.inventory.management.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.inventory.management.model.User;
+
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

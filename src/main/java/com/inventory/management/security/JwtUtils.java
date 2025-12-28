@@ -8,10 +8,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
+import com.inventory.management.dto.UserDetailsImpl;
+
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import com.inventory.management.model.UserDetailsImpl;
 
 @Component
 public class JwtUtils {

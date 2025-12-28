@@ -72,7 +72,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
                 String username = jwtUtils.getUserNameFromJwtToken(jwt);
                 String tenantId = jwtUtils.getTenantIdFromJwtToken(jwt);
-                
+                TenantContext.setTenantId(tenantId);
                 UserDetails userDetails = userDetailsServiceImpl.loadUserByTenantIdAndUsername(tenantId, username);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                         userDetails, null, userDetails.getAuthorities());

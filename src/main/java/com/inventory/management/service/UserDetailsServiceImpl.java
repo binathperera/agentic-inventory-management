@@ -1,8 +1,8 @@
 package com.inventory.management.service;
 
 import com.inventory.management.config.TenantContext;
+import com.inventory.management.dto.UserDetailsImpl;
 import com.inventory.management.model.User;
-import com.inventory.management.model.UserDetailsImpl;
 import com.inventory.management.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;

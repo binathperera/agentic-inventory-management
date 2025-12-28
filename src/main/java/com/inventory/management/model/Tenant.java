@@ -1,23 +1,20 @@
 package com.inventory.management.model;
 
 import java.time.Instant;
-
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
-
 import lombok.Data;
-import org.springframework.data.mongodb.core.index.Indexed;
 
 @Document(collection = "tenant")
 @Data
 public class Tenant {
     @Id
     private String id;
+    @Field("name")
     private String name;
-    @Indexed(unique = true)
     @Field("sub_domain")
     private String subDomain;
     @CreatedDate
@@ -30,6 +27,12 @@ public class Tenant {
     private int schemaVersion = 1;
 
     public Tenant(String name, String subDomain) {
+        if(name == null || name.isEmpty()) {
+            throw new IllegalArgumentException("name cannot be null or empty");
+        }
+        if(subDomain == null || subDomain.isEmpty()) {
+            throw new IllegalArgumentException("subDomain cannot be null or empty");
+        }
         this.name = name;
         this.subDomain = subDomain;
     }

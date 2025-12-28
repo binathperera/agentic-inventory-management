@@ -3,6 +3,7 @@ package com.inventory.management.service;
 import com.inventory.management.config.TenantContext;
 import com.inventory.management.dto.JwtResponse;
 import com.inventory.management.dto.LoginRequest;
+import com.inventory.management.dto.Role;
 import com.inventory.management.dto.SignupRequest;
 import com.inventory.management.model.User;
 import com.inventory.management.repository.UserRepository;
@@ -21,7 +22,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-import com.inventory.management.model.Role;
 
 @Service
 public class AuthService {
@@ -87,11 +87,11 @@ public class AuthService {
             return new JwtResponse("Error: Email is already in use!");
         }
 
-        User user = new User();
-        user.setUsername(signupRequest.getUsername());
-        user.setEmail(signupRequest.getEmail());
-        user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
-        user.setTenantId(tenantId);
+        String username= signupRequest.getUsername();
+        String email= signupRequest.getEmail();
+        String password = passwordEncoder.encode(signupRequest.getPassword());
+        User user = new User(tenantId, username, email, password);
+        
         Set<Role> roles = signupRequest.getRoles();
         if (roles == null || roles.isEmpty()) {
             roles = new HashSet<>();
