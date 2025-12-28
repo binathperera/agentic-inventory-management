@@ -1,40 +1,94 @@
 package com.inventory.management.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
-import java.time.LocalDateTime;
+import org.springframework.data.mongodb.core.mapping.Field;
+import java.time.Instant;
 
-@Document(collection = "transactions")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Document(collection = "transaction")
+@CompoundIndexes({
+        @CompoundIndex(name = "tenant_transaction_idx", def = "{'tenant_id': 1, 'transaction_id': 1}", unique = true),
+        @CompoundIndex(name = "tenant_date_idx", def = "{'tenant_id': 1, 'created_at': -1}")
+})
 public class Transaction {
+
     @Id
     private String id;
+
+    @Field("tenant_id")
+    @Indexed
+    private String tenantId;
+
+    @Field("transaction_id")
+    @Indexed
+    private String transactionId;
+
+    @Field("payment_method")
     private String paymentMethod;
+
+    @Field("gross_amount")
     private Double grossAmount;
-    private Double discount;
-    private Double totalAmount; // This is the Net Amount
+
+    @Field("discount_amount")
+    private Double discountAmount;
+
+    @Field("net_amount")
+    private Double netAmount;
+
+    @Field("paid_amount")
     private Double paidAmount;
-    private Double balance;
-    private LocalDateTime createdAt;
 
-    public Transaction() {
-        this.createdAt = LocalDateTime.now();
+    @Field("balance_amount")
+    private Double balanceAmount;
+
+    @CreatedDate
+    @Field("created_at")
+    private Instant createdAt;
+
+    @LastModifiedDate
+    @Field("updated_at")
+    private Instant updatedAt;
+
+    @Field("schema_version")
+    private int schemaVersion = 1;
+
+    public Transaction(String tenantId, String transactionId, String paymentMethod,
+            Double grossAmount, Double discountAmount, Double netAmount,
+            Double paidAmount, Double balanceAmount) {
+        if (tenantId == null || tenantId.isEmpty()) {
+            throw new IllegalArgumentException("tenantId cannot be null or empty");
+        }
+        if (transactionId == null || transactionId.isEmpty()) {
+            throw new IllegalArgumentException("transactionId cannot be null or empty");
+        }
+        if (grossAmount == null || grossAmount < 0) {
+            throw new IllegalArgumentException("grossAmount cannot be null or negative");
+        }
+        if (netAmount == null || netAmount < 0) {
+            throw new IllegalArgumentException("netAmount cannot be null or negative");
+        }
+        if (paidAmount == null || paidAmount < 0) {
+            throw new IllegalArgumentException("paidAmount cannot be null or negative");
+        }
+
+        this.tenantId = tenantId;
+        this.transactionId = transactionId;
+        this.paymentMethod = paymentMethod;
+        this.grossAmount = grossAmount;
+        this.discountAmount = discountAmount != null ? discountAmount : 0.0;
+        this.netAmount = netAmount;
+        this.paidAmount = paidAmount;
+        this.balanceAmount = balanceAmount != null ? balanceAmount : 0.0;
     }
-
-    // Getters and Setters
-    public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-    public String getPaymentMethod() { return paymentMethod; }
-    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
-    public Double getGrossAmount() { return grossAmount; }
-    public void setGrossAmount(Double grossAmount) { this.grossAmount = grossAmount; }
-    public Double getDiscount() { return discount; }
-    public void setDiscount(Double discount) { this.discount = discount; }
-    public Double getTotalAmount() { return totalAmount; }
-    public void setTotalAmount(Double totalAmount) { this.totalAmount = totalAmount; }
-    public Double getPaidAmount() { return paidAmount; }
-    public void setPaidAmount(Double paidAmount) { this.paidAmount = paidAmount; }
-    public Double getBalance() { return balance; }
-    public void setBalance(Double balance) { this.balance = balance; }
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }
