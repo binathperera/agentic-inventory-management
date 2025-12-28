@@ -73,19 +73,16 @@ public class SecurityConfig {
         return http.build();
     }
 
-    @Value("${client.url}")
-    private String clientUrl;
+    @Value("${client.allowed.urls}")
+    private String allowedClientUrls;
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // 🔒 Use explicit origin — "*" will fail if you use credentials or auth headers
-        // configuration.setAllowedOrigins(List.of(clientUrl));
-        configuration.setAllowedOriginPatterns(List.of(
-                "http://*.localhost:3000", // Allows any tenant on localhost
-                "http://43.204.141.135" // Your production/staging IP
-        ));
+        // Read allowed origins from configuration (comma-separated)
+        List<String> origins = List.of(allowedClientUrls.split(","));
+        configuration.setAllowedOriginPatterns(origins);
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
