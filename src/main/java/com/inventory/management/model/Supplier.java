@@ -1,63 +1,35 @@
 package com.inventory.management.model;
 
+import java.time.Instant;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Document(collection = "suppliers")
+@NoArgsConstructor
+@Data
+@Document(collection = "supplier")
 public class Supplier {
+    private String tenant_id;
     @Id
-    private String supplierId;
+    private String _id;
     private String name;
     private String email;
-    private String contact;
     private String address;
+    private String contact;
+    @CreatedDate
+    private Instant created_at;
+    @LastModifiedDate
+    private Instant updated_at;
+    private int schema_version = 1;
 
-    // Constructors, getters, and setters
-    public Supplier(String name, String email, String contact, String address) {
+    public Supplier(String tenant_id, String name, String email, String contact, String address) {
+        this.tenant_id = tenant_id;
         this.name = name;
         this.email = email;
         this.contact = contact;
         this.address = address;
     }
-
-    public String getSupplierId() {
-        return supplierId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getContact() {
-        return contact;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setSupplierId(String supplierId) {
-        this.supplierId = supplierId;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setContact(String contact) {
-        this.contact = contact;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
 }

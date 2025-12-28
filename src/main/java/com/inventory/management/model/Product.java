@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Document(collection = "products")
 public class Product {
-    
+    private String tenant_id;
     @Id
     private String id;
     
@@ -39,7 +39,8 @@ public class Product {
     private LocalDateTime updatedAt;
 
     // Constructors, getters, and setters
-    public Product(String name, String description, String sku, float price, Integer quantity, String category, String supplier,LocalDateTime createdAt) {
+    public Product(String tenant_id, String name, String description, String sku, float price, Integer quantity, String category, String supplier,LocalDateTime createdAt) {
+        this.tenant_id = tenant_id;
         this.name = name;
         this.description = description;
         this.sku = sku;

@@ -2,7 +2,6 @@ package com.inventory.management.controller;
 
 import com.inventory.management.dto.JwtResponse;
 import com.inventory.management.dto.LoginRequest;
-import com.inventory.management.dto.MessageResponse;
 import com.inventory.management.dto.SignupRequest;
 import com.inventory.management.service.AuthService;
 import jakarta.validation.Valid;
