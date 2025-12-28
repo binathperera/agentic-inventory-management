@@ -2,6 +2,7 @@ package com.inventory.management.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import com.inventory.management.model.Supplier;
 import com.inventory.management.model.Product;
@@ -21,6 +22,7 @@ import com.inventory.management.repository.TransactionItemRepository;
 import java.time.LocalDate;
 
 @Component
+@Profile("!test")
 public class SampleDataLoader implements CommandLineRunner {
 
     @Autowired
