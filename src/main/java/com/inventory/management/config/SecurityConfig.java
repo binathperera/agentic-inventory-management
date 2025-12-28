@@ -2,8 +2,6 @@ package com.inventory.management.config;
 
 import com.inventory.management.security.JwtAuthenticationFilter;
 
-import jakarta.servlet.http.HttpServletRequest;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -69,8 +67,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/products/**").authenticated()
                         .anyRequest().authenticated());
 
-        http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.authenticationProvider(authenticationProvider());
 
         return http.build();
     }
@@ -84,7 +82,10 @@ public class SecurityConfig {
 
         // 🔒 Use explicit origin — "*" will fail if you use credentials or auth headers
         // configuration.setAllowedOrigins(List.of(clientUrl));
-        configuration.setAllowedOrigins(List.of("http://43.204.141.135", "http://localhost:5173"));
+        configuration.setAllowedOriginPatterns(List.of(
+                "http://*.localhost:3000", // Allows any tenant on localhost
+                "http://43.204.141.135" // Your production/staging IP
+        ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

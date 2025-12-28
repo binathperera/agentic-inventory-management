@@ -7,25 +7,17 @@ import jakarta.validation.constraints.PositiveOrZero;
 import lombok.Data;
 
 @Data
-public class ProductRequest {
-    
+public class ProductDTO {
+    @NotBlank(message = "id is required")
+    private String id;
     @NotBlank(message = "Product name is required")
     private String name;
-    
-    private String description;
-    
-    @NotBlank(message = "SKU is required")
-    private String sku;
-    
     @NotNull(message = "Price is required")
     @Positive(message = "Price must be positive")
-    private float price;
-    
+    private float latestUnitPrice;
+    @NotBlank(message = "Latest batch number is required")
+    private String latestBatchNo;
     @NotNull(message = "Quantity is required")
     @PositiveOrZero(message = "Quantity must be zero or positive")
     private Integer quantity;
-    
-    private String category;
-    
-    private String supplier;
 }

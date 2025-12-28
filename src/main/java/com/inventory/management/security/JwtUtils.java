@@ -6,8 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+
+import com.inventory.management.dto.UserDetailsImpl;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
@@ -25,12 +26,13 @@ public class JwtUtils {
     private int jwtExpirationMs;
     
     public String generateJwtToken(Authentication authentication) {
-        UserDetails userPrincipal = (UserDetails) authentication.getPrincipal();
+        UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
         
         SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
         
         return Jwts.builder()
                 .setSubject(userPrincipal.getUsername())
+                .claim("tenantId", userPrincipal.getTenantId())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs))
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -46,6 +48,15 @@ public class JwtUtils {
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
+    }
+    public String getTenantIdFromJwtToken(String token) {
+        SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+        return Jwts.parserBuilder()
+               .setSigningKey(key)
+               .build()
+               .parseClaimsJws(token)
+               .getBody()
+               .get("tenantId", String.class);
     }
     
     public boolean validateJwtToken(String authToken) {
