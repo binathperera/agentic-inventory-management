@@ -2,7 +2,6 @@ package com.inventory.management.service;
 
 import com.inventory.management.dto.JwtResponse;
 import com.inventory.management.dto.LoginRequest;
-import com.inventory.management.dto.MessageResponse;
 import com.inventory.management.dto.SignupRequest;
 import com.inventory.management.model.User;
 import com.inventory.management.repository.UserRepository;
@@ -16,8 +15,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -79,8 +76,6 @@ public class AuthService {
             roles.add("USER");
         }
         user.setRoles(roles);
-        user.setCreatedAt(LocalDateTime.now());
-        user.setUpdatedAt(LocalDateTime.now());
 
         User u = userRepository.save(user);
 
