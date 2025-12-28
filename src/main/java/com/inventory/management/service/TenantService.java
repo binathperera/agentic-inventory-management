@@ -12,7 +12,7 @@ public class TenantService {
     private TenantRepository tenantRepository;
 
     public String getTenantIdBySubDomain(String subDomain) {
-        Tenant tenant = tenantRepository.findBySub_domain(subDomain).orElse(null);
+        Tenant tenant = tenantRepository.findBySubDomain(subDomain).orElse(null);
         return tenant != null ? tenant.getId() : null;
     }
 }

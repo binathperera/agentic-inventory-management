@@ -47,7 +47,7 @@ public class UserDetailsImpl implements UserDetails {
                 user.getUsername(),
                 user.getEmail(),
                 user.getPassword(),
-                user.getTenant_id(), // Mapping your 'tenant_id' field here
+                user.getTenantId(), // Mapping your 'tenant_id' field here
                 authorities);
     }
 

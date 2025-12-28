@@ -36,9 +36,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private TenantService tenantService;
 
     private String extractSubdomain(HttpServletRequest request) {
-        String host = request.getHeader("Host");
-        if (host != null && host.contains(".")) {
-            return host.split("\\.")[0];
+        String host = request.getHeader("Origin"); // e.g., "tenant1.localhost:3000"
+        System.out.println("Host header: " + host);
+        if (host != null) {
+            // Remove port if present
+            String subdomain = host.split("\\.")[0];
+            String[] parts = subdomain.split("//");
+            
+            // If it's tenant1.localhost, parts[0] is "tenant1"
+            if (parts.length > 1) {
+                return parts[1];
+            }else{
+                return parts[0];
+            }
         }
         return null;
     }
@@ -46,12 +56,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+                System.out.println("Filter triggered for: " + request.getRequestURI());
         try {
             String jwt = parseJwt(request);
+            System.out.println("JWT extracted: " + jwt);
             // 1. ALWAYS resolve tenant from Subdomain first (for Login & API calls)
             if (jwt == null || !jwtUtils.validateJwtToken(jwt)) {
+                System.out.println("Resolving tenant from subdomain.");
                 String subdomain = extractSubdomain(request);
+                System.out.println("Extracted subdomain: " + subdomain);
                 String tenantId = tenantService.getTenantIdBySubDomain(subdomain);
+                System.out.println("Resolved tenant ID: " + tenantId);
                 TenantContext.setTenantId(tenantId);
             }
             if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
@@ -82,9 +97,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return null;
     }
 
-    @Override
-    protected boolean shouldNotFilter(HttpServletRequest request) {
-        String path = request.getServletPath();
-        return path.startsWith("/api/auth/");
-    }
+    // @Override
+    // protected boolean shouldNotFilter(HttpServletRequest request) {
+    //     String path = request.getServletPath();
+    //     return path.startsWith("/api/auth/");
+    // }
 }

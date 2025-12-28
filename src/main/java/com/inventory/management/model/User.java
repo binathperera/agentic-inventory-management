@@ -9,6 +9,8 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.Set;
@@ -22,7 +24,8 @@ import java.util.Set;
     @CompoundIndex(name = "tenant_email_idx", def = "{'tenant_id': 1, 'email': 1}", unique = true)
 })
 public class User {
-    private String tenant_id;
+    @Field("tenant_id") 
+    private String tenantId; 
     @Id
     private String id;
     private String username;

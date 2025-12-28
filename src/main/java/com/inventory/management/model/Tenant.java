@@ -6,6 +6,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+
 import lombok.Data;
 import org.springframework.data.mongodb.core.index.Indexed;
 
@@ -16,14 +18,19 @@ public class Tenant {
     private String id;
     private String name;
     @Indexed(unique = true)
-    private String sub_domain;
+    @Field("sub_domain")
+    private String subDomain;
     @CreatedDate
-    private Instant created_at;
+    @Field("created_at")
+    private Instant createdAt;
     @LastModifiedDate
-    private Instant updated_at;
-    private int schema_version = 1;
+    @Field("updated_at")
+    private Instant updatedAt;
+    @Field("schema_version")
+    private int schemaVersion = 1;
 
-    public Tenant(String name) {
+    public Tenant(String name, String subDomain) {
         this.name = name;
+        this.subDomain = subDomain;
     }
 }

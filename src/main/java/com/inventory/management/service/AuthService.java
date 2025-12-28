@@ -39,37 +39,51 @@ public class AuthService {
     private JwtUtils jwtUtils;
 
     public JwtResponse authenticateUser(LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwt = jwtUtils.generateJwtToken(authentication);
-
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .map(role -> role.replace("ROLE_", ""))
-                .collect(Collectors.toList());
-            
-        // 1. Grab the tenant_id resolved from the subdomain by your Filter
-        String tenantId = TenantContext.getTenantId();
-        if (tenantId == null) {
-            throw new UsernameNotFoundException("Access denied: No tenant identified.");
+        try{
+            System.out.println("Authenticating user: " + loginRequest.getUsername());
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+            System.out.println("Authentication successful for user: " + loginRequest.getUsername());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            String jwt = jwtUtils.generateJwtToken(authentication);
+            System.out.println("Generated JWT: " + jwt);
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            List<String> roles = userDetails.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .map(role -> role.replace("ROLE_", ""))
+                    .collect(Collectors.toList());
+            for(String role : roles){
+                System.out.println("User role: " + role);
+            }
+            // 1. Grab the tenant_id resolved from the subdomain by your Filter
+            String tenantId = TenantContext.getTenantId();
+            System.out.println("Authenticating user for tenant: " + tenantId);
+            System.out.println("UserDetails username: " + userDetails.getUsername());
+            if (tenantId == null) {
+                throw new UsernameNotFoundException("Access denied: No tenant identified.");
+            }
+            User user = userRepository.findByUsernameAndTenantId(userDetails.getUsername(), tenantId).orElseThrow();
+            // if user not found, return error message
+            if (user == null) {
+                return new JwtResponse("Error: User not found!");
+            }
+            return new JwtResponse(jwt, userDetails.getUsername(), user.getEmail(), roles);
+        } catch (Exception e) {
+            System.out.println("Authentication failed for user: " + loginRequest.getUsername() + " - " + e.getMessage());
+            return new JwtResponse("Error: Invalid username or password!");
         }
-        User user = userRepository.findByUsernameAndTenant_id(userDetails.getUsername(), tenantId).orElseThrow();
-        // if user not found, return error message
-        if (user == null) {
-            return new JwtResponse("Error: User not found!");
-        }
-        return new JwtResponse(jwt, userDetails.getUsername(), user.getEmail(), roles);
     }
 
     public JwtResponse registerUser(SignupRequest signupRequest) {
-        if (userRepository.existsByUsername(signupRequest.getUsername())) {
+        String tenantId = TenantContext.getTenantId();
+        if(tenantId == null){
+            throw new RuntimeException("Access denied: No tenant identified.");
+        }
+        if (userRepository.existsByUsernameAndTenantId(signupRequest.getUsername(), tenantId)) {
             return new JwtResponse("Error: Username is already taken!");
         }
 
-        if (userRepository.existsByEmail(signupRequest.getEmail())) {
+        if (userRepository.existsByEmailAndTenantId(signupRequest.getEmail(), tenantId)) {
             return new JwtResponse("Error: Email is already in use!");
         }
 
@@ -77,13 +91,14 @@ public class AuthService {
         user.setUsername(signupRequest.getUsername());
         user.setEmail(signupRequest.getEmail());
         user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
-        
+        user.setTenantId(tenantId);
         Set<Role> roles = signupRequest.getRoles();
         if (roles == null || roles.isEmpty()) {
             roles = new HashSet<>();
             roles.add(new Role("ROLE_USER", "Default role", 1, null));
         }
         user.setRoles(roles);
+        System.out.println("Registering user for tenant: " + tenantId);
         User u = userRepository.save(user);
 
         // Automatically authenticate the user after successful registration

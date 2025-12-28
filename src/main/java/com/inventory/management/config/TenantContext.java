@@ -6,6 +6,7 @@ public class TenantContext {
 
     public static void setTenantId(String tenantId) {
         currentTenant.set(tenantId);
+        System.out.println("Tenant ID set to: " + tenantId);
     }
 
     public static String getTenantId() {

@@ -25,9 +25,10 @@ public class SampleDataLoader implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         // Checking if data already exists
-        Tenant tenant1=null;
+        Tenant tenant1=null, tenant2=null;
         if (tenantRepository.count() == 0) {
-            tenant1 = tenantRepository.save(new Tenant("ABC Corporation"));
+            tenant1 = tenantRepository.save(new Tenant("ABC Corporation", "abc"));
+            tenant2 = tenantRepository.save(new Tenant("XYZ Enterprises", "xyz"));
         }else{
             tenant1 = tenantRepository.findAll().get(0);
         }
