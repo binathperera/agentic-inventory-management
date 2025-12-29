@@ -1,48 +1,47 @@
 package com.inventory.management.controller;
 
+import com.inventory.management.dto.SupplierDTO;
+import com.inventory.management.model.Supplier;
+import com.inventory.management.service.SupplierService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import com.inventory.management.model.Supplier;
-import com.inventory.management.repository.SupplierRepository;
-
-import org.springframework.lang.NonNull;
-
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/suppliers")
 public class SupplierController {
 
     @Autowired
-    private SupplierRepository supplierRepository;
+    private SupplierService supplierService;
 
     @GetMapping
     public ResponseEntity<List<Supplier>> getAllSuppliers() {
-        return ResponseEntity.ok(supplierRepository.findAll());
+        return ResponseEntity.ok(supplierService.getAllSuppliers());
     }
 
-    @SuppressWarnings("null")
     @GetMapping("/{id}")
-    public Supplier getSupplierById(@PathVariable String id) {
-        return supplierRepository.findById(id).orElseThrow();
+    public ResponseEntity<Supplier> getSupplierById(@PathVariable String id) {
+        return ResponseEntity.ok(supplierService.getSupplierById(id));
     }
 
-    @SuppressWarnings("null")
     @PostMapping
-    public Supplier createSupplier(@RequestBody Supplier supplier) {
-        return supplierRepository.save(supplier);
+    public ResponseEntity<Supplier> createSupplier(@Valid @RequestBody SupplierDTO supplierRequest) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(supplierService.createSupplier(supplierRequest));
     }
 
     @PutMapping("/{id}")
-    public Supplier updateSupplier(@PathVariable String id, @RequestBody Supplier supplier) {
-        supplier.setId(id);
-        return supplierRepository.save(supplier);
+    public ResponseEntity<Supplier> updateSupplier(@PathVariable String id,
+            @Valid @RequestBody SupplierDTO supplierRequest) {
+        return ResponseEntity.ok(supplierService.updateSupplier(id, supplierRequest));
     }
 
-
     @DeleteMapping("/{id}")
-    public void deleteSupplier(@PathVariable @NonNull String id) {
-        supplierRepository.deleteById(id);
+    public ResponseEntity<Map<String, String>> deleteSupplier(@PathVariable String id) {
+        supplierService.deleteSupplier(id);
+        return ResponseEntity.ok(Map.of("message", "Supplier deleted successfully"));
     }
 }

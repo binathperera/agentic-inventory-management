@@ -42,11 +42,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             // Remove port if present
             String subdomain = host.split("\\.")[0];
             String[] parts = subdomain.split("//");
-            
+
             // If it's tenant1.localhost, parts[0] is "tenant1"
             if (parts.length > 1) {
                 return parts[1];
-            }else{
+            } else {
                 return parts[0];
             }
         }
@@ -56,32 +56,57 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-                System.out.println("Filter triggered for: " + request.getRequestURI());
+        System.out.println("Filter triggered for: " + request.getRequestURI());
         try {
             String jwt = parseJwt(request);
             System.out.println("JWT extracted: " + jwt);
-            // 1. ALWAYS resolve tenant from Subdomain first (for Login & API calls)
-            if (jwt == null || !jwtUtils.validateJwtToken(jwt)) {
-                System.out.println("Resolving tenant from subdomain.");
-                String subdomain = extractSubdomain(request);
-                System.out.println("Extracted subdomain: " + subdomain);
-                String tenantId = tenantService.getTenantIdBySubDomain(subdomain);
-                System.out.println("Resolved tenant ID: " + tenantId);
-                TenantContext.setTenantId(tenantId);
-            }
+
+            // If JWT is valid, extract tenant and user details from JWT
             if (jwt != null && jwtUtils.validateJwtToken(jwt)) {
+                System.out.println("JWT is valid, extracting user details from token");
                 String username = jwtUtils.getUserNameFromJwtToken(jwt);
                 String tenantId = jwtUtils.getTenantIdFromJwtToken(jwt);
-                TenantContext.setTenantId(tenantId);
-                UserDetails userDetails = userDetailsServiceImpl.loadUserByTenantIdAndUsername(tenantId, username);
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                        userDetails, null, userDetails.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                System.out.println("JWT validated. Username: " + username + ", TenantId: " + tenantId);
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                if (tenantId != null && !tenantId.isBlank()) {
+                    // Set tenant context
+                    TenantContext.setTenantId(tenantId);
+
+                    // Load user details with authorities/roles
+                    try {
+                        UserDetails userDetails = userDetailsServiceImpl.loadUserByTenantIdAndUsername(tenantId,
+                                username);
+                        System.out.println("User details loaded. Authorities: " + userDetails.getAuthorities());
+
+                        // Create authentication token with loaded authorities
+                        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                                userDetails, null, userDetails.getAuthorities());
+                        authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                        SecurityContextHolder.getContext().setAuthentication(authentication);
+                        System.out.println("Authentication set successfully");
+                    } catch (Exception e) {
+                        System.out.println("Failed to load user details: " + e.getMessage());
+                        logger.error("Failed to load user details: {}", e.getMessage());
+                    }
+                }
+            } else {
+                // No valid JWT, try to resolve tenant from subdomain (for auth endpoints like
+                // login)
+                System.out.println("No valid JWT found, resolving tenant from subdomain");
+                String subdomain = extractSubdomain(request);
+                System.out.println("Extracted subdomain: " + subdomain);
+
+                if (subdomain != null && !subdomain.isBlank()) {
+                    String tenantId = tenantService.getTenantIdBySubDomain(subdomain);
+                    System.out.println("Resolved tenant ID from subdomain: " + tenantId);
+                    if (tenantId != null && !tenantId.isBlank()) {
+                        TenantContext.setTenantId(tenantId);
+                    }
+                }
             }
         } catch (Exception e) {
-            logger.error("Cannot set user authentication: {}", e.getMessage());
+            logger.error("Error in JWT authentication filter: {}", e.getMessage());
+            e.printStackTrace();
         }
 
         filterChain.doFilter(request, response);
@@ -99,7 +124,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     // @Override
     // protected boolean shouldNotFilter(HttpServletRequest request) {
-    //     String path = request.getServletPath();
-    //     return path.startsWith("/api/auth/");
+    // String path = request.getServletPath();
+    // return path.startsWith("/api/auth/");
     // }
 }
