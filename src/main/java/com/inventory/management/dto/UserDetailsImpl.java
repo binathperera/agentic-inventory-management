@@ -25,8 +25,8 @@ public class UserDetailsImpl implements UserDetails {
 
     private Collection<? extends GrantedAuthority> authorities;
 
-    public UserDetailsImpl(String id, String username, String email, String password, 
-                           String tenant_id, Collection<? extends GrantedAuthority> authorities) {
+    public UserDetailsImpl(String id, String username, String email, String password,
+            String tenant_id, Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -39,9 +39,10 @@ public class UserDetailsImpl implements UserDetails {
      * Static factory method to convert our MongoDB User entity into UserDetailsImpl
      */
     public static UserDetailsImpl build(User user) {
-        //For now we will valide requests only using the role id. In future we can extend this to use level and permissions.
+        // For now we will valide requests only using the role id. In future we can
+        // extend this to use level and permissions.
         List<GrantedAuthority> authorities = user.getRoles().stream()
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getId()))
+                .map(role -> new SimpleGrantedAuthority(role.getId()))
                 .collect(Collectors.toList());
 
         return new UserDetailsImpl(
@@ -58,32 +59,54 @@ public class UserDetailsImpl implements UserDetails {
         return authorities;
     }
 
-    public String getId() { return id; }
-    public String getEmail() { return email; }
-    public String getTenantId() { return tenant_id; }
+    public String getId() {
+        return id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getTenantId() {
+        return tenant_id;
+    }
 
     @Override
-    public String getPassword() { return password; }
+    public String getPassword() {
+        return password;
+    }
 
     @Override
-    public String getUsername() { return username; }
+    public String getUsername() {
+        return username;
+    }
 
     @Override
-    public boolean isAccountNonExpired() { return true; }
+    public boolean isAccountNonExpired() {
+        return true;
+    }
 
     @Override
-    public boolean isAccountNonLocked() { return true; }
+    public boolean isAccountNonLocked() {
+        return true;
+    }
 
     @Override
-    public boolean isCredentialsNonExpired() { return true; }
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
 
     @Override
-    public boolean isEnabled() { return true; }
+    public boolean isEnabled() {
+        return true;
+    }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         UserDetailsImpl user = (UserDetailsImpl) o;
         return Objects.equals(id, user.id);
     }

@@ -36,7 +36,7 @@ public class ProductService {
                 productRequest.getId(),
                 productRequest.getName(),
                 productRequest.getLatestBatchNo(),
-                productRequest.getQuantity(),
+                productRequest.getRemainingQuantity(),
                 productRequest.getLatestUnitPrice());
         return productRepository.save(product);
     }
@@ -45,7 +45,7 @@ public class ProductService {
         Product existingProduct = getProductById(id);
         existingProduct.setName(productRequest.getName());
         existingProduct.setLatestBatchNo(productRequest.getLatestBatchNo());
-        existingProduct.setRemainingQuantity(productRequest.getQuantity());
+        existingProduct.setRemainingQuantity(productRequest.getRemainingQuantity());
         existingProduct.setLatestUnitPrice(productRequest.getLatestUnitPrice());
         return productRepository.save(existingProduct);
     }

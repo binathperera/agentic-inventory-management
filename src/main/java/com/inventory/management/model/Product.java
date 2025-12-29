@@ -45,9 +45,9 @@ public class Product {
         if (name == null || name.isEmpty()) {
             throw new IllegalArgumentException("name cannot be null or empty");
         }
-        if (latestBatchNo == null || latestBatchNo.isEmpty()) {
-            throw new IllegalArgumentException("latestBatchNo cannot be null or empty");
-        }
+        // if (latestBatchNo == null || latestBatchNo.isEmpty()) {
+        //     throw new IllegalArgumentException("latestBatchNo cannot be null or empty");
+        // }
         if (remainingQuantity == null || remainingQuantity < 0) {
             throw new IllegalArgumentException("remainingQuantity cannot be null or negative");
         }

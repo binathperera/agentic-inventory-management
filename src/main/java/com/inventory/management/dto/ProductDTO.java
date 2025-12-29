@@ -15,9 +15,8 @@ public class ProductDTO {
     @NotNull(message = "Price is required")
     @Positive(message = "Price must be positive")
     private float latestUnitPrice;
-    @NotBlank(message = "Latest batch number is required")
     private String latestBatchNo;
     @NotNull(message = "Quantity is required")
     @PositiveOrZero(message = "Quantity must be zero or positive")
-    private Integer quantity;
+    private Integer remainingQuantity;
 }

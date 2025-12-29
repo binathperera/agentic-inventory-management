@@ -111,8 +111,14 @@ public class TenantConfigService {
      * @return Created TenantConfig with default values
      */
     public TenantConfig createDefaultConfig(String tenantId) {
+        if (tenantId == null || tenantId.isBlank()) {
+            throw new IllegalArgumentException("Tenant ID cannot be null or blank");
+        }
+        
         if (tenantConfigRepository.existsByTenantId(tenantId)) {
-            throw new IllegalStateException("Config already exists for tenant: " + tenantId);
+            // If config already exists, return it instead of throwing error
+            return tenantConfigRepository.findByTenantId(tenantId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Config not found for tenant: " + tenantId));
         }
 
         TenantConfig config = new TenantConfig();

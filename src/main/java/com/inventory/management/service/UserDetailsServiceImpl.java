@@ -7,7 +7,6 @@ import com.inventory.management.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -28,7 +27,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                                                 + username + " for tenant: " + tenantId));
 
                 Collection<GrantedAuthority> authorities = user.getRoles().stream()
-                                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getId()))
+                                .map(role -> new SimpleGrantedAuthority(role.getId()))
                                 .collect(Collectors.toList());
 
                 return new UserDetailsImpl(
@@ -54,7 +53,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                                                 "User Not Found with username: " + username));
 
                 Collection<GrantedAuthority> authorities = user.getRoles().stream()
-                                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getId()))
+                                .map(role -> new SimpleGrantedAuthority(role.getId()))
                                 .collect(Collectors.toList());
 
                 return new UserDetailsImpl(
