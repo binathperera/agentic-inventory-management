@@ -4,6 +4,9 @@ import com.inventory.management.config.TenantContext;
 import com.inventory.management.exception.ResourceNotFoundException;
 import com.inventory.management.model.TenantConfig;
 import com.inventory.management.repository.TenantConfigRepository;
+
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -24,11 +27,17 @@ public class TenantConfigService {
      */
     public TenantConfig getConfigBySubDomain(String subDomain) {
         String tenantId = tenantService.getTenantIdBySubDomain(subDomain);
+        System.out.println("Resolved tenantId: " + tenantId + " for subDomain: " + subDomain);
         if (tenantId == null) {
             throw new ResourceNotFoundException("Tenant not found for subdomain: " + subDomain);
         }
-        return tenantConfigRepository.findByTenantId(tenantId)
-                .orElseThrow(() -> new ResourceNotFoundException("Config not found for tenant: " + tenantId));
+        Optional<TenantConfig> tenantConfig = tenantConfigRepository.findByTenantId(tenantId);
+        if (tenantConfig.isEmpty()) {
+            System.out.println("No config found for tenantId: " + tenantId);
+            return createDefaultConfig(tenantId);
+        } else {
+            return tenantConfig.get();
+        }
     }
 
     /**
@@ -114,7 +123,7 @@ public class TenantConfigService {
         if (tenantId == null || tenantId.isBlank()) {
             throw new IllegalArgumentException("Tenant ID cannot be null or blank");
         }
-        
+
         if (tenantConfigRepository.existsByTenantId(tenantId)) {
             // If config already exists, return it instead of throwing error
             return tenantConfigRepository.findByTenantId(tenantId)
