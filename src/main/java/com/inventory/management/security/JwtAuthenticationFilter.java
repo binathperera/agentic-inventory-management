@@ -36,21 +36,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private TenantService tenantService;
 
     private String extractSubdomain(HttpServletRequest request) {
-        String host = request.getHeader("Origin"); // e.g., "tenant1.localhost:3000"
-        System.out.println("Host header: " + host);
-        if (host != null) {
-            // Remove port if present
-            String subdomain = host.split("\\.")[0];
-            String[] parts = subdomain.split("//");
+        // Try Host header first (preferred), then Origin
+        String hostHeader = request.getHeader("Host");
+        String originHeader = request.getHeader("Origin");
+        String host = hostHeader != null ? hostHeader : originHeader;
+        if (host == null) return null;
 
-            // If it's tenant1.localhost, parts[0] is "tenant1"
-            if (parts.length > 1) {
-                return parts[1];
-            } else {
-                return parts[0];
-            }
+        // Remove protocol if present
+        host = host.replaceFirst("^https?://", "");
+        // Strip path
+        int slashIdx = host.indexOf('/');
+        if (slashIdx > -1) host = host.substring(0, slashIdx);
+        // Remove port
+        if (host.contains(":")) host = host.split(":")[0];
+
+        // Examples this handles:
+        // tenant1.localhost, tenant1.example.com, localhost, example.com
+        String[] parts = host.split("\\\\.");
+        if (parts.length == 0) return null;
+        // If first part is 'localhost' or plain host, no subdomain
+        if ("localhost".equalsIgnoreCase(parts[0]) || parts.length == 1) {
+            return null;
         }
-        return null;
+        // Otherwise first segment is the subdomain (tenant)
+        return parts[0];
     }
 
     @Override

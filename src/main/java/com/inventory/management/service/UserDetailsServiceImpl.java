@@ -20,7 +20,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        throw new UnsupportedOperationException("Use loadUserByTenantIdAndUsername");
+        // Authentication entrypoint uses this method. Use TenantContext to resolve tenant
+        String tenantId = com.inventory.management.config.TenantContext.getTenantId();
+        if (tenantId == null || tenantId.isBlank()) {
+            throw new UsernameNotFoundException("Tenant id is not set in context");
+        }
+
+        return loadUserByTenantIdAndUsername(tenantId, username);
     }
 
     public UserDetails loadUserByTenantIdAndUsername(String tenantId, String username) {

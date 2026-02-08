@@ -87,7 +87,7 @@ public class SampleDataLoader implements CommandLineRunner {
                     adminUser.setRoles(adminRoles);
                     adminUser.setEnabled(true);
                     userRepository.save(adminUser);
-                    System.out.println("✓ Sample ADMIN user created: username=admin, password=admin123");
+                    System.out.println("✓ Sample ADMIN user created: username=admin1, password=admin123");
 
                     // Create CASHIER user
                     User cashierUser = new User(tenant1.getId(), "cashier", "cashier@example.com", passwordEncoder.encode("cashier123"));
