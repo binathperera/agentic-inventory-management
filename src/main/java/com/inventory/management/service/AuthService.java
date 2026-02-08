@@ -108,13 +108,12 @@ public class AuthService {
         String encodedPassword = passwordEncoder.encode(signupRequest.getPassword());
         User user = new User(tenantId, signupRequest.getUsername(), signupRequest.getEmail(), encodedPassword);
         
-        // Set roles (default to CASHIER for new registrations)
+        // Set roles (default to USER for new registrations - read-only access)
         Set<Role> roles = signupRequest.getRoles();
         if (roles == null || roles.isEmpty()) {
-            Role cashierRole = new Role();
-            cashierRole.setName("CASHIER");
+            Role userRole = new Role("USER");
             roles = new HashSet<>();
-            roles.add(cashierRole);
+            roles.add(userRole);
         }
         
         user.setRoles(roles);

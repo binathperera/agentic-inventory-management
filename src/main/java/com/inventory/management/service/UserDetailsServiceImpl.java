@@ -33,7 +33,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
             user.getUsername(),
             user.getEmail(),
             user.getTenantId(),
-            user.getRoles()
+            user.getRoles(),
+            user.getPassword(),
+            user.isEnabled()
         );
     }
 }

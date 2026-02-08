@@ -78,9 +78,20 @@ public class UserController {
         // Default role if none provided
         Set<Role> roles = request.getRoles();
         if (roles == null || roles.isEmpty()) {
-            Role defaultRole = new Role();
-            defaultRole.setName("CASHIER");  // Default to CASHIER
-            roles = Set.of(defaultRole);
+            roles = Set.of(new Role("USER"));  // Default to USER (read-only)
+        } else {
+            // Validate all provided roles
+            for (Role role : roles) {
+                try {
+                    if (role.getName() == null || role.getName().isEmpty()) {
+                        return ResponseEntity.badRequest().body(null);
+                    }
+                    // This will throw if invalid role name
+                    Role validRole = new Role(role.getName());
+                } catch (IllegalArgumentException e) {
+                    return ResponseEntity.badRequest().body(null);
+                }
+            }
         }
 
         User user = userService.createUser(
@@ -160,12 +171,15 @@ public class UserController {
             @PathVariable String id,
             @PathVariable String roleName) {
         try {
-            Role role = new Role();
-            role.setName(roleName.toUpperCase());  // "ADMIN", "CASHIER"
+            // Validate role name using RoleEnum
+            String validatedRoleName = com.inventory.management.enums.RoleEnum.fromString(roleName).name();
+            Role role = new Role(validatedRoleName);
             User user = userService.addRoleToUser(id, role);
             return ResponseEntity.ok(user);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(null);
         }
     }
 
@@ -178,12 +192,15 @@ public class UserController {
             @PathVariable String id,
             @PathVariable String roleName) {
         try {
-            Role role = new Role();
-            role.setName(roleName.toUpperCase());
+            // Validate role name using RoleEnum
+            String validatedRoleName = com.inventory.management.enums.RoleEnum.fromString(roleName).name();
+            Role role = new Role(validatedRoleName);
             User user = userService.removeRoleFromUser(id, role);
             return ResponseEntity.ok(user);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(null);
         }
     }
 
