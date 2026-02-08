@@ -1,27 +1,31 @@
 package com.inventory.management.dto;
 
-import lombok.AllArgsConstructor;
+import java.util.List;
 import lombok.Data;
 
-import java.util.List;
-
 @Data
-@AllArgsConstructor
 public class JwtResponse {
     private String token;
-    private String type = "Bearer";
     private String username;
     private String email;
+    private String tenantId;
     private List<String> roles;
-    private String errorMessage;
-    public JwtResponse(String token, String username, String email, List<String> roles) {
+    
+    public JwtResponse(String token, String username, String email, String tenantId, List<String> roles) {
         this.token = token;
         this.username = username;
         this.email = email;
+        this.tenantId = tenantId;
         this.roles = roles;
     }
-
-    public JwtResponse(String errorMessage) {
-        this.errorMessage = errorMessage;
+    
+    // Error constructor
+    public JwtResponse(String error) {
+        this.token = null;
+        this.username = null;
+        this.email = null;
+        this.tenantId = null;
+        this.roles = null;
     }
 }
+

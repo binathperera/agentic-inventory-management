@@ -12,12 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -39,73 +38,96 @@ public class AuthService {
     private JwtUtils jwtUtils;
 
     public JwtResponse authenticateUser(LoginRequest loginRequest) {
-        try{
+        try {
             System.out.println("Authenticating user: " + loginRequest.getUsername());
+            
+            // 1. Authenticate user credentials
             Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+                new UsernamePasswordAuthenticationToken(
+                    loginRequest.getUsername(), 
+                    loginRequest.getPassword()
+                )
+            );
+            
             System.out.println("Authentication successful for user: " + loginRequest.getUsername());
             SecurityContextHolder.getContext().setAuthentication(authentication);
+            
+            // 2. Generate JWT with roles
             String jwt = jwtUtils.generateJwtToken(authentication);
-            System.out.println("Generated JWT: " + jwt);
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            List<String> roles = userDetails.getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .map(role -> role.replace("ROLE_", ""))
-                    .collect(Collectors.toList());
-            for(String role : roles){
-                System.out.println("User role: " + role);
-            }
-            // 1. Grab the tenant_id resolved from the subdomain by your Filter
+            System.out.println("Generated JWT: " + jwt.substring(0, 20) + "...");
+            
+            // 3. Get tenant context (set by JwtAuthenticationFilter)
             String tenantId = TenantContext.getTenantId();
             System.out.println("Authenticating user for tenant: " + tenantId);
-            System.out.println("UserDetails username: " + userDetails.getUsername());
+            
             if (tenantId == null) {
-                throw new UsernameNotFoundException("Access denied: No tenant identified.");
+                throw new RuntimeException("Access denied: No tenant identified.");
             }
-            User user = userRepository.findByUsernameAndTenantId(userDetails.getUsername(), tenantId).orElseThrow();
-            // if user not found, return error message
-            if (user == null) {
-                return new JwtResponse("Error: User not found!");
-            }
-            return new JwtResponse(jwt, userDetails.getUsername(), user.getEmail(), roles);
+            
+            // 4. Load full user details with tenant filtering
+            User user = userRepository.findByTenantIdAndUsername(tenantId, loginRequest.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found for tenant: " + tenantId));
+            
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            List<String> roles = userDetails.getAuthorities().stream()
+                .map(auth -> auth.getAuthority().replace("ROLE_", ""))
+                .collect(Collectors.toList());
+            
+            System.out.println("User roles: " + roles);
+            
+            return new JwtResponse(
+                jwt, 
+                user.getUsername(), 
+                user.getEmail(), 
+                user.getTenantId(),
+                roles
+            );
+            
         } catch (Exception e) {
-            System.out.println("Authentication failed for user: " + loginRequest.getUsername() + " - " + e.getMessage());
-            return new JwtResponse("Error: Invalid username or password!");
+            System.out.println("Authentication failed: " + e.getMessage());
+            return new JwtResponse("Error: " + e.getMessage());
         }
     }
 
     public JwtResponse registerUser(SignupRequest signupRequest) {
         String tenantId = TenantContext.getTenantId();
-        if(tenantId == null){
+        if (tenantId == null) {
             throw new RuntimeException("Access denied: No tenant identified.");
         }
-        if (userRepository.existsByUsernameAndTenantId(signupRequest.getUsername(), tenantId)) {
+
+        // Check if user already exists
+        if (userRepository.existsByTenantIdAndUsername(tenantId, signupRequest.getUsername())) {
             return new JwtResponse("Error: Username is already taken!");
         }
 
-        if (userRepository.existsByEmailAndTenantId(signupRequest.getEmail(), tenantId)) {
+        if (userRepository.existsByTenantIdAndEmail(tenantId, signupRequest.getEmail())) {
             return new JwtResponse("Error: Email is already in use!");
         }
 
-        String username= signupRequest.getUsername();
-        String email= signupRequest.getEmail();
-        String password = passwordEncoder.encode(signupRequest.getPassword());
-        User user = new User(tenantId, username, email, password);
+        // Create user
+        String encodedPassword = passwordEncoder.encode(signupRequest.getPassword());
+        User user = new User(tenantId, signupRequest.getUsername(), signupRequest.getEmail(), encodedPassword);
         
+        // Set roles (default to CASHIER for new registrations)
         Set<Role> roles = signupRequest.getRoles();
         if (roles == null || roles.isEmpty()) {
+            Role cashierRole = new Role();
+            cashierRole.setName("CASHIER");
             roles = new HashSet<>();
-            roles.add(new Role("ROLE_USER", "Default role", 1, null));
+            roles.add(cashierRole);
         }
+        
         user.setRoles(roles);
-        System.out.println("Registering user for tenant: " + tenantId);
-        User u = userRepository.save(user);
-
-        // Automatically authenticate the user after successful registration
+        System.out.println("Registering user '" + signupRequest.getUsername() + "' for tenant: " + tenantId);
+        
+        User savedUser = userRepository.save(user);
+        System.out.println("User registered successfully with ID: " + savedUser.getId());
+        
+        // Auto-login after registration
         LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setUsername(u.getUsername());
-        loginRequest.setPassword(u.getPassword());
-
+        loginRequest.setUsername(savedUser.getUsername());
+        loginRequest.setPassword(signupRequest.getPassword()); // Plaintext for auto-login
+        
         return authenticateUser(loginRequest);
     }
 }

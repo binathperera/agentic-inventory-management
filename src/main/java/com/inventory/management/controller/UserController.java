@@ -3,6 +3,7 @@ package com.inventory.management.controller;
 import com.inventory.management.dto.Role;
 import com.inventory.management.model.User;
 import com.inventory.management.service.UserService;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,10 +32,10 @@ public class UserController {
     }
 
     /**
-     * Get user by ID (user can see own info or admin can see any)
+     * Get user by ID (admin only)
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or @userService.getUserById(#id).id == authentication.principal.id")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<User> getUserById(@PathVariable String id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
@@ -63,25 +64,37 @@ public class UserController {
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<User> createUser(@RequestBody CreateUserRequest request) {
+        // Validation
         if (request.getUsername() == null || request.getUsername().isEmpty()) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(null);
         }
         if (request.getEmail() == null || request.getEmail().isEmpty()) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(null);
         }
         if (request.getPassword() == null || request.getPassword().isEmpty()) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(null);
         }
 
-        Set<Role> roles = request.getRoles() != null ? request.getRoles()
-                : Set.of(new Role("ROLE_USER", "Default user role", 1, null));
-        User user = userService.createUser(request.getUsername(), request.getEmail(), request.getPassword(), roles);
+        // Default role if none provided
+        Set<Role> roles = request.getRoles();
+        if (roles == null || roles.isEmpty()) {
+            Role defaultRole = new Role();
+            defaultRole.setName("CASHIER");  // Default to CASHIER
+            roles = Set.of(defaultRole);
+        }
+
+        User user = userService.createUser(
+            request.getUsername(), 
+            request.getEmail(), 
+            request.getPassword(), 
+            roles
+        );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 
     /**
-     * Update user information (admin or self)
+     * Update user information (admin only)
      */
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
@@ -93,7 +106,7 @@ public class UserController {
     }
 
     /**
-     * Change user password (user can change own, admin can change any)
+     * Change user password (admin only)
      */
     @PostMapping("/{id}/change-password")
     @PreAuthorize("hasRole('ADMIN')")
@@ -141,16 +154,17 @@ public class UserController {
     /**
      * Add role to user (admin only)
      */
-    @PostMapping("/{id}/roles/{role}")
+    @PostMapping("/{id}/roles/{roleName}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<User> addRoleToUser(
             @PathVariable String id,
-            @PathVariable String role) {
+            @PathVariable String roleName) {
         try {
-            Role roleEnum = new Role("ROLE_" + role.toUpperCase(), "Default role", 1, null);
-            User user = userService.addRoleToUser(id, roleEnum);
+            Role role = new Role();
+            role.setName(roleName.toUpperCase());  // "ADMIN", "CASHIER"
+            User user = userService.addRoleToUser(id, role);
             return ResponseEntity.ok(user);
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
     }
@@ -158,22 +172,23 @@ public class UserController {
     /**
      * Remove role from user (admin only)
      */
-    @DeleteMapping("/{id}/roles/{role}")
+    @DeleteMapping("/{id}/roles/{roleName}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<User> removeRoleFromUser(
             @PathVariable String id,
-            @PathVariable String role) {
+            @PathVariable String roleName) {
         try {
-            Role roleEnum = new Role("ROLE_" + role.toUpperCase(), "Default role", 1, null);
-            User user = userService.removeRoleFromUser(id, roleEnum);
+            Role role = new Role();
+            role.setName(roleName.toUpperCase());
+            User user = userService.removeRoleFromUser(id, role);
             return ResponseEntity.ok(user);
-        } catch (IllegalArgumentException e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
     }
 
     /**
-     * Check if username exists (public, for registration validation)
+     * Check if username exists (public)
      */
     @GetMapping("/check/username/{username}")
     public ResponseEntity<Map<String, Boolean>> checkUsernameExists(@PathVariable String username) {
@@ -182,7 +197,7 @@ public class UserController {
     }
 
     /**
-     * Check if email exists (public, for registration validation)
+     * Check if email exists (public)
      */
     @GetMapping("/check/email/{email}")
     public ResponseEntity<Map<String, Boolean>> checkEmailExists(@PathVariable String email) {
@@ -190,22 +205,22 @@ public class UserController {
         return ResponseEntity.ok(Map.of("exists", exists));
     }
 
-    // DTOs for request bodies
-    @lombok.Data
+    // ✅ CORRECTED DTOs - Simple and clean
+    @Data
     public static class CreateUserRequest {
         private String username;
         private String email;
         private String password;
-        private Set<Role> roles;
+        private Set<Role> roles;  // Can be null
     }
 
-    @lombok.Data
+    @Data
     public static class UpdateUserRequest {
         private String email;
         private Set<Role> roles;
     }
 
-    @lombok.Data
+    @Data
     public static class ChangePasswordRequest {
         private String newPassword;
     }

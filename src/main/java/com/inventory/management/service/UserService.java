@@ -88,7 +88,7 @@ public class UserService {
         if (roles != null && !roles.isEmpty()) {
             user.setRoles(roles);
         } else {
-            user.setRoles(Set.of(new Role("ROLE_USER", "Default user role", 1, null)));
+            user.setRoles(Set.of(new Role()));
         }
         user.setEnabled(true);
 
