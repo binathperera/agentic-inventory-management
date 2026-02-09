@@ -1,14 +1,16 @@
 package com.inventory.management.enums;
 
 /**
- * Role enumeration for RBAC system
+ * Role enumeration for user access control in the inventory management system.
  * 
  * ADMIN:   Full system access including user management, configuration, and deletions
+ * MANAGER: Manage Inventory, Suppliers, Invoices, Sales, Product Batches
  * CASHIER: Transaction and sales access, can view inventory
  * USER:    Read-only access to inventory and reports, cannot modify data
  */
 public enum RoleEnum {
     ADMIN("ADMIN"),
+    MANAGER("MANAGER"),
     CASHIER("CASHIER"),
     USER("USER");
 
@@ -26,7 +28,7 @@ public enum RoleEnum {
         try {
             return RoleEnum.valueOf(name.toUpperCase());
         } catch (IllegalArgumentException | NullPointerException e) {
-            throw new IllegalArgumentException("Invalid role name: " + name + ". Valid roles are: ADMIN, CASHIER, USER");
+            throw new IllegalArgumentException("Invalid role name: " + name + ". Valid roles are: ADMIN, MANAGER, CASHIER, USER");
         }
     }
 }

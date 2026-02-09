@@ -88,7 +88,7 @@ public class UserService {
         if (roles != null && !roles.isEmpty()) {
             user.setRoles(roles);
         } else {
-            // Default to USER role (read-only access)
+            
             user.setRoles(Set.of(new Role("USER")));
         }
         user.setEnabled(true);

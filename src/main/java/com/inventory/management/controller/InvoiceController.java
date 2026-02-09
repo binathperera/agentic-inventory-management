@@ -20,25 +20,25 @@ public class InvoiceController {
     private InvoiceService invoiceService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('USER')")
     public ResponseEntity<List<Invoice>> listAll() {
         return ResponseEntity.ok(invoiceService.getAll());
     }
 
     @GetMapping("/{invoiceNo}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('USER')")
     public ResponseEntity<Invoice> getByInvoice(@PathVariable String invoiceNo) {
         return ResponseEntity.ok(invoiceService.getByInvoiceNo(invoiceNo));
     }
 
     @GetMapping("/supplier/{supplierId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('USER')")
     public ResponseEntity<List<Invoice>> bySupplier(@PathVariable String supplierId) {
         return ResponseEntity.ok(invoiceService.getBySupplier(supplierId));
     }
 
     @GetMapping("/date-range")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('USER')")
     public ResponseEntity<List<Invoice>> byDateRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate start,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate end) {
@@ -46,7 +46,7 @@ public class InvoiceController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<Invoice> create(@RequestBody Invoice invoice) {
         return ResponseEntity.ok(invoiceService.create(invoice));
     }

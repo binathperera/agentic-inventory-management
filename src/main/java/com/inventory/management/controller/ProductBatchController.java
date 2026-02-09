@@ -20,33 +20,33 @@ public class ProductBatchController {
     private ProductBatchService productBatchService;
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('USER')")
     public ResponseEntity<List<ProductBatch>> listAll() {
         return ResponseEntity.ok(productBatchService.getAll());
 
     }
 
     @GetMapping("/invoice/{invoiceNo}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('USER')")
     public ResponseEntity<List<ProductBatch>> byInvoice(@PathVariable String invoiceNo) {
         return ResponseEntity.ok(productBatchService.getByInvoice(invoiceNo));
     }
 
     @GetMapping("/product/{productId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('USER')")
     public ResponseEntity<List<ProductBatch>> byProduct(@PathVariable String productId) {
         return ResponseEntity.ok(productBatchService.getByProduct(productId));
     }
 
     @GetMapping("/expiring")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')or hasRole('USER')")
     public ResponseEntity<List<ProductBatch>> expiring(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate before) {
         return ResponseEntity.ok(productBatchService.getExpiringBefore(before));
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<ProductBatch> create(@RequestBody ProductBatch batch) {
         return ResponseEntity.ok(productBatchService.create(batch));
     }

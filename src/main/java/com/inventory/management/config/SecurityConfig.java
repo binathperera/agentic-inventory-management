@@ -32,51 +32,32 @@ public class SecurityConfig {
             .sessionManagement(session -> 
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
-                // PUBLIC (No login required)
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/tenant-config/by-subdomain/**").permitAll()
-                
-                // USER MANAGEMENT (ADMIN ONLY)
                 .requestMatchers("/api/users/**").hasRole("ADMIN")
-                
-                // PRODUCTS (USER can only GET, CASHIER/ADMIN can modify)
-                .requestMatchers("GET", "/api/products/**").hasAnyRole("USER", "CASHIER", "ADMIN")
-                .requestMatchers("POST", "/api/products/**").hasAnyRole("CASHIER", "ADMIN")
-                .requestMatchers("PUT", "/api/products/**").hasAnyRole("CASHIER", "ADMIN")
-                .requestMatchers("PATCH", "/api/products/**").hasAnyRole("CASHIER", "ADMIN")
-                .requestMatchers("DELETE", "/api/products/**").hasRole("ADMIN")
-                
-                // SUPPLIERS (USER can only GET, CASHIER/ADMIN can modify)
-                .requestMatchers("GET", "/api/suppliers/**").hasAnyRole("USER", "CASHIER", "ADMIN")
-                .requestMatchers("POST", "/api/suppliers/**").hasAnyRole("CASHIER", "ADMIN")
-                .requestMatchers("PUT", "/api/suppliers/**").hasAnyRole("CASHIER", "ADMIN")
-                .requestMatchers("DELETE", "/api/suppliers/**").hasRole("ADMIN")
-                
-                // INVOICES (USER can only GET, CASHIER/ADMIN can create/modify, ADMIN can delete)
-                .requestMatchers("GET", "/api/invoices/**").hasAnyRole("USER", "CASHIER", "ADMIN")
-                .requestMatchers("POST", "/api/invoices/**").hasRole("ADMIN")
-                .requestMatchers("DELETE", "/api/invoices/**").hasRole("ADMIN")
-                
-                // PRODUCT BATCHES (USER can only GET, CASHIER/ADMIN can modify)
-                .requestMatchers("GET", "/api/product-batches/**").hasAnyRole("USER", "CASHIER", "ADMIN")
-                .requestMatchers("POST", "/api/product-batches/**").hasRole("ADMIN")
-                .requestMatchers("DELETE", "/api/product-batches/**").hasRole("ADMIN")
-                
-                // TRANSACTIONS (CASHIER/ADMIN only - not for USER)
-                .requestMatchers("/api/transactions/**").hasAnyRole("CASHIER", "ADMIN")
-                
-                // AI CHAT (CASHIER/ADMIN only - not for USER)
-                .requestMatchers("/api/chat/**").hasAnyRole("CASHIER", "ADMIN")
-                
-                // AUDIT LOGS (ADMIN only, except specific entity history accessible to USER/CASHIER)
-                .requestMatchers("GET", "/api/audit-logs/history/**").hasAnyRole("USER", "CASHIER", "ADMIN")
+                .requestMatchers("GET", "/api/products/**").hasAnyRole("USER", "MANAGER", "CASHIER", "ADMIN")
+                .requestMatchers("POST", "/api/products/**").hasAnyRole("MANAGER", "CASHIER", "ADMIN")
+                .requestMatchers("PUT", "/api/products/**").hasAnyRole("MANAGER", "CASHIER", "ADMIN")
+                .requestMatchers("PATCH", "/api/products/**").hasAnyRole("MANAGER", "CASHIER", "ADMIN")
+                .requestMatchers("DELETE", "/api/products/**").hasAnyRole("MANAGER", "ADMIN")
+                .requestMatchers("GET", "/api/suppliers/**").hasAnyRole("USER", "MANAGER", "CASHIER", "ADMIN")
+                .requestMatchers("POST", "/api/suppliers/**").hasAnyRole("MANAGER", "CASHIER", "ADMIN")
+                .requestMatchers("PUT", "/api/suppliers/**").hasAnyRole("MANAGER", "CASHIER", "ADMIN")
+                .requestMatchers("DELETE", "/api/suppliers/**").hasAnyRole("MANAGER", "ADMIN")
+                .requestMatchers("GET", "/api/invoices/**").hasAnyRole("USER", "MANAGER", "CASHIER", "ADMIN")
+                .requestMatchers("POST", "/api/invoices/**").hasAnyRole("MANAGER", "ADMIN")
+                .requestMatchers("PUT", "/api/invoices/**").hasAnyRole("MANAGER", "ADMIN")
+                .requestMatchers("DELETE", "/api/invoices/**").hasAnyRole("MANAGER", "ADMIN")
+                .requestMatchers("GET", "/api/product-batches/**").hasAnyRole("USER", "MANAGER", "CASHIER", "ADMIN")
+                .requestMatchers("POST", "/api/product-batches/**").hasAnyRole("MANAGER", "ADMIN")
+                .requestMatchers("PUT", "/api/product-batches/**").hasAnyRole("MANAGER", "ADMIN")
+                .requestMatchers("DELETE", "/api/product-batches/**").hasAnyRole("MANAGER", "ADMIN")
+                .requestMatchers("/api/transactions/**").hasAnyRole("MANAGER", "CASHIER", "ADMIN")
+                .requestMatchers("/api/chat/**").hasAnyRole("MANAGER", "CASHIER", "ADMIN")
+                .requestMatchers("GET", "/api/audit-logs/history/**").hasAnyRole("USER", "MANAGER", "CASHIER", "ADMIN")
                 .requestMatchers("/api/audit-logs/**").hasRole("ADMIN")
-                
-                // TENANT CONFIG (GET is public, others ADMIN only)
                 .requestMatchers("GET", "/api/tenant-config/**").permitAll()
                 .requestMatchers("/api/tenant-config/**").hasRole("ADMIN")
-                
-                // Everything else requires authentication
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -94,3 +75,4 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 }
+
