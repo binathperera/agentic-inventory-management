@@ -21,31 +21,31 @@ public class TransactionController {
     private TransactionService transactionService;
 
     @PostMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('CASHIER')")
     public ResponseEntity<Transaction> create(@RequestBody Transaction transaction) {
         return ResponseEntity.ok(transactionService.create(transaction));
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('CASHIER')")
     public ResponseEntity<List<Transaction>> listAll() {
         return ResponseEntity.ok(transactionService.getAll());
     }
 
     @GetMapping("/{transactionId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('CASHIER')")
     public ResponseEntity<Transaction> getById(@PathVariable String transactionId) {
         return ResponseEntity.ok(transactionService.getByTransactionId(transactionId));
     }
 
     @GetMapping("/outstanding")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('CASHIER')")
     public ResponseEntity<List<Transaction>> outstanding() {
         return ResponseEntity.ok(transactionService.getOutstanding());
     }
 
     @GetMapping("/date-range")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('CASHIER')")
     public ResponseEntity<List<Transaction>> byDateRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant start,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant end) {
@@ -54,20 +54,20 @@ public class TransactionController {
 
     // Items
     @GetMapping("/{transactionId}/items")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('CASHIER')")
     public ResponseEntity<List<TransactionItem>> getItems(@PathVariable String transactionId) {
         return ResponseEntity.ok(transactionService.getItems(transactionId));
     }
 
     @PostMapping("/{transactionId}/items")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('CASHIER')")
     public ResponseEntity<TransactionItem> addItem(@PathVariable String transactionId,
             @RequestBody TransactionItem item) {
         return ResponseEntity.ok(transactionService.addItem(transactionId, item));
     }
 
     @DeleteMapping("/{transactionId}/items/{productId}")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('CASHIER')")
     public ResponseEntity<Void> deleteItem(@PathVariable String transactionId, @PathVariable String productId) {
         transactionService.removeItem(transactionId, productId);
         return ResponseEntity.noContent().build();
