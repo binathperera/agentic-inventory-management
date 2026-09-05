@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,25 +36,32 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private TenantService tenantService;
 
+    @Value("${app.tenant.default-subdomain:}")
+    private String defaultTenantSubdomain;
+
     private String extractSubdomain(HttpServletRequest request) {
         // Try Host header first (preferred), then Origin
         String hostHeader = request.getHeader("Host");
         String originHeader = request.getHeader("Origin");
         String host = hostHeader != null ? hostHeader : originHeader;
-        if (host == null) return null;
+        if (host == null)
+            return null;
 
         // Remove protocol if present
         host = host.replaceFirst("^https?://", "");
         // Strip path
         int slashIdx = host.indexOf('/');
-        if (slashIdx > -1) host = host.substring(0, slashIdx);
+        if (slashIdx > -1)
+            host = host.substring(0, slashIdx);
         // Remove port
-        if (host.contains(":")) host = host.split(":")[0];
+        if (host.contains(":"))
+            host = host.split(":")[0];
 
         // Examples this handles:
         // tenant1.localhost, tenant1.example.com, localhost, example.com
-        String[] parts = host.split("\\\\.");
-        if (parts.length == 0) return null;
+        String[] parts = host.split("\\.");
+        if (parts.length == 0)
+            return null;
         // If first part is 'localhost' or plain host, no subdomain
         if ("localhost".equalsIgnoreCase(parts[0]) || parts.length == 1) {
             return null;
@@ -99,18 +107,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     }
                 }
             } else {
-                // No valid JWT, try to resolve tenant from subdomain (for auth endpoints like
-                // login)
-                System.out.println("No valid JWT found, resolving tenant from subdomain");
-                String subdomain = extractSubdomain(request);
-                System.out.println("Extracted subdomain: " + subdomain);
-
-                if (subdomain != null && !subdomain.isBlank()) {
-                    String tenantId = tenantService.getTenantIdBySubDomain(subdomain);
-                    System.out.println("Resolved tenant ID from subdomain: " + tenantId);
-                    if (tenantId != null && !tenantId.isBlank()) {
-                        TenantContext.setTenantId(tenantId);
+                // No valid JWT: resolve an explicit tenant header or the host subdomain.
+                String tenantId = request.getHeader("X-Tenant-Id");
+                if (tenantId == null || tenantId.isBlank()) {
+                    String subdomain = request.getHeader("X-Tenant-Subdomain");
+                    if (subdomain == null || subdomain.isBlank()) {
+                        subdomain = extractSubdomain(request);
                     }
+                    if ((subdomain == null || subdomain.isBlank()) && isLocalhost(request)) {
+                        subdomain = defaultTenantSubdomain;
+                    }
+                    if (subdomain != null && !subdomain.isBlank()) {
+                        tenantId = tenantService.getTenantIdBySubDomain(subdomain.trim());
+                    }
+                }
+                if (tenantId != null && !tenantId.isBlank()) {
+                    TenantContext.setTenantId(tenantId.trim());
                 }
             }
         } catch (Exception e) {
@@ -118,7 +130,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             e.printStackTrace();
         }
 
-        filterChain.doFilter(request, response);
+        try {
+            filterChain.doFilter(request, response);
+        } finally {
+            TenantContext.clear();
+        }
+    }
+
+    private boolean isLocalhost(HttpServletRequest request) {
+        String host = request.getHeader("Host");
+        if (host == null || host.isBlank()) {
+            return false;
+        }
+        host = host.replaceFirst("^https?://", "");
+        int slashIdx = host.indexOf('/');
+        if (slashIdx > -1) {
+            host = host.substring(0, slashIdx);
+        }
+        if (host.contains(":")) {
+            host = host.substring(0, host.indexOf(':'));
+        }
+        return "localhost".equalsIgnoreCase(host) || "127.0.0.1".equals(host);
     }
 
     private String parseJwt(HttpServletRequest request) {

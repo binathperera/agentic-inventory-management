@@ -82,6 +82,7 @@ On Linux/macOS, replace `^` with `\` and `host.docker.internal` with your host I
 ## Multi-Tenant Behavior
 
 - Tenant is resolved from the request `Origin` header subdomain (e.g., `tenant1.localhost:3000`) when no JWT is present.
+- Direct requests to `localhost` use the `abc` tenant by default for local development. Override this with `DEFAULT_TENANT_SUBDOMAIN` or the `X-Tenant-Id` / `X-Tenant-Subdomain` request headers.
 - When a JWT is provided, the `tenantId` claim is used.
 - Ensure frontend requests include the `Origin` header (browsers add it automatically). For `curl`, you can add `-H "Origin: tenant1.localhost:3000"`.
 

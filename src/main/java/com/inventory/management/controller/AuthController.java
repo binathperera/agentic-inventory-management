@@ -56,7 +56,7 @@ public class AuthController {
                             host = host.replaceFirst("^https?://", "");
                             int slash = host.indexOf('/'); if (slash > -1) host = host.substring(0, slash);
                             if (host.contains(":")) host = host.split(":")[0];
-                            String[] parts = host.split("\\\\.");
+                            String[] parts = host.split("\\.");
                             if (parts.length > 1 && !"localhost".equalsIgnoreCase(parts[0])) {
                                 String subdomain = parts[0];
                                 String resolved = tenantService.getTenantIdBySubDomain(subdomain);

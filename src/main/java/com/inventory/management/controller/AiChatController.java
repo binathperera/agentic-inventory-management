@@ -3,9 +3,8 @@ package com.inventory.management.controller;
 import com.inventory.management.service.AiChatService;
 
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
-import org.bson.Document;
 
 @RestController
 @RequestMapping("/api/chat")
@@ -24,7 +23,9 @@ public class AiChatController {
      */
     @GetMapping("/query")
     @PreAuthorize("hasRole('ADMIN') or hasRole('USER')")
-    public List<Document> query(@RequestParam String prompt) {
-        return aiService.query(prompt);
+    public String query(
+            @RequestParam String prompt,
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorizationHeader) {
+        return aiService.query(prompt, authorizationHeader);
     }
 }
