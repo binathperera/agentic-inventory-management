@@ -44,6 +44,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(authz -> authz
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/mcp").hasAnyRole("USER", "MANAGER", "CASHIER", "ADMIN")
                 .requestMatchers("/api/tenant-config/by-subdomain/**").permitAll()
                 .requestMatchers("/api/users/**").hasRole("ADMIN")
                 .requestMatchers("GET", "/api/products/**").hasAnyRole("USER", "MANAGER", "CASHIER", "ADMIN")

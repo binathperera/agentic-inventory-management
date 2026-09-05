@@ -92,6 +92,37 @@ On Linux/macOS, replace `^` with `\` and `host.docker.internal` with your host I
 - `POST /api/auth/register` — Public
 - `POST /api/auth/login` — Public
 
+### MCP Agent Interface
+
+The application exposes an authenticated MCP JSON-RPC endpoint at `POST /mcp`. Use
+the same JWT returned by `/api/auth/login` in the `Authorization: Bearer ...` header.
+The `tools/list` response contains three invoice mutation tools:
+`create_invoice`, `update_invoice`, and `delete_invoice`. Normal endpoint role and
+tenant checks still apply.
+
+Example: create an invoice:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "tools/call",
+  "params": {
+    "name": "create_invoice",
+    "arguments": {
+      "invoice": {
+        "invoiceNo": "INV-1001",
+        "supplierId": "supplier-123",
+        "date": "2026-09-05"
+      }
+    }
+  }
+}
+```
+
+Set `MCP_API_BASE_URL` when the application is not reachable at
+`http://127.0.0.1:8080` from its own runtime environment.
+
 ### Products
 - `GET /api/products` — Authenticated
 - `GET /api/products/{id}` — Authenticated

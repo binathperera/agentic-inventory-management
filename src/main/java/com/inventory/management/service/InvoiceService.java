@@ -45,4 +45,15 @@ public class InvoiceService {
         invoice.setTenantId(tenant());
         return invoiceRepository.save(invoice);
     }
+
+    public Invoice update(String invoiceNo, Invoice changes) {
+        Invoice invoice = getByInvoiceNo(invoiceNo);
+        invoice.setSupplierId(changes.getSupplierId());
+        invoice.setDate(changes.getDate());
+        return invoiceRepository.save(invoice);
+    }
+
+    public void delete(String invoiceNo) {
+        invoiceRepository.delete(getByInvoiceNo(invoiceNo));
+    }
 }
