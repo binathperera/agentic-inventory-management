@@ -22,6 +22,16 @@ public class ProductService {
                 .toList();
     }
 
+    public List<Product> getProductsNeedingRestock() {
+        String tenantId = requireTenantId();
+        return productRepository.findAll().stream()
+                .filter(product -> tenantId.equals(product.getTenantId()))
+                .filter(product -> product.getCriticalStockQuantity() != null
+                        && product.getRemainingQuantity() != null
+                        && product.getRemainingQuantity() <= product.getCriticalStockQuantity())
+                .toList();
+    }
+
     public Product getProductById(String id) {
         String tenantId = requireTenantId();
         return productRepository.findById(id)
@@ -35,9 +45,10 @@ public class ProductService {
                 tenantId,
                 productRequest.getId(),
                 productRequest.getName(),
-                productRequest.getLatestBatchNo(),
-                productRequest.getRemainingQuantity(),
-                productRequest.getLatestUnitPrice());
+                null,
+                0,
+                productRequest.getCriticalStockQuantity(),
+                0);
         return productRepository.save(product);
     }
 
@@ -46,6 +57,7 @@ public class ProductService {
         existingProduct.setName(productRequest.getName());
         existingProduct.setLatestBatchNo(productRequest.getLatestBatchNo());
         existingProduct.setRemainingQuantity(productRequest.getRemainingQuantity());
+        existingProduct.setCriticalStockQuantity(productRequest.getCriticalStockQuantity());
         existingProduct.setLatestUnitPrice(productRequest.getLatestUnitPrice());
         return productRepository.save(existingProduct);
     }

@@ -125,11 +125,14 @@ Set `MCP_API_BASE_URL` when the application is not reachable at
 
 ### Products
 - `GET /api/products` — Authenticated
+- `GET /api/products/restocking` — Authenticated; products whose remaining quantity is at or below their critical stock quantity
 - `GET /api/products/{id}` — Authenticated
 - `POST /api/products` — Authenticated
 - `PUT /api/products/{id}` — Authenticated
 - `PATCH /api/products/{id}/qty` — Authenticated
 - `DELETE /api/products/{id}` — `ADMIN`
+
+Product create and update requests include `criticalStockQuantity`.
 
 ### Suppliers
 - `GET /api/suppliers` — Authenticated
@@ -150,6 +153,10 @@ Set `MCP_API_BASE_URL` when the application is not reachable at
 - `GET /api/product-batches/product/{productId}` — Authenticated
 - `GET /api/product-batches/expiring?before=YYYY-MM-DD` — Authenticated
 - `POST /api/product-batches` — `ADMIN`
+- `PUT /api/product-batches/{id}` — `MANAGER` or `ADMIN`
+- `DELETE /api/product-batches/{id}` — `MANAGER` or `ADMIN`
+
+MCP read tools include `get_products_needing_restock` and `get_expiring_before`.
 
 ### Transactions
 - `POST /api/transactions` — Authenticated

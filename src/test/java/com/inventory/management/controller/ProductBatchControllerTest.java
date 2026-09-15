@@ -18,7 +18,9 @@ import com.inventory.management.config.TestMongoConfig;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(ProductBatchController.class)
@@ -45,5 +47,27 @@ class ProductBatchControllerTest {
         mockMvc.perform(get("/api/product-batches/invoice/INV-1").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
         verify(service).getByInvoice("INV-1");
+    }
+
+    @Test
+    @WithMockUser(roles = { "MANAGER" })
+    void update_returnsOk() throws Exception {
+        when(service.update(eq("batch-1"), any(ProductBatch.class))).thenReturn(new ProductBatch());
+
+        mockMvc.perform(put("/api/product-batches/batch-1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}"))
+                .andExpect(status().isOk());
+
+        verify(service).update(eq("batch-1"), any(ProductBatch.class));
+    }
+
+    @Test
+    @WithMockUser(roles = { "MANAGER" })
+    void delete_returnsNoContent() throws Exception {
+        mockMvc.perform(delete("/api/product-batches/batch-1"))
+                .andExpect(status().isNoContent());
+
+        verify(service).delete("batch-1");
     }
 }

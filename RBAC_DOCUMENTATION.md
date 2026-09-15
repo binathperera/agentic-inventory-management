@@ -40,6 +40,7 @@ The system implements a three-tier role-based access control model using JWT tok
 | Endpoint | USER | CASHIER | ADMIN |
 |----------|------|---------|-------|
 | GET / | ✓ | ✓ | ✓ |
+| GET /restocking | ✓ | ✓ | ✓ |
 | GET /{id} | ✓ | ✓ | ✓ |
 | POST / | ✗ | ✓ | ✓ |
 | PUT /{id} | ✗ | ✓ | ✓ |
@@ -73,7 +74,8 @@ The system implements a three-tier role-based access control model using JWT tok
 | GET /product/{productId} | ✓ | ✓ | ✓ |
 | GET /expiring?before=YYYY-MM-DD | ✓ | ✓ | ✓ |
 | POST / | ✗ | ✗ | ✓ |
-| DELETE / | ✗ | ✗ | ✓ |
+| PUT /{id} | ✗ | ✓ | ✓ |
+| DELETE /{id} | ✗ | ✓ | ✓ |
 
 ### Transactions (`/api/transactions`)
 | Endpoint | USER | CASHIER | ADMIN |

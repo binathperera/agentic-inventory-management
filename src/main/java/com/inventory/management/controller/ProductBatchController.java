@@ -50,4 +50,17 @@ public class ProductBatchController {
     public ResponseEntity<ProductBatch> create(@RequestBody ProductBatch batch) {
         return ResponseEntity.ok(productBatchService.create(batch));
     }
+
+    @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public ResponseEntity<ProductBatch> update(@PathVariable String id, @RequestBody ProductBatch batch) {
+        return ResponseEntity.ok(productBatchService.update(id, batch));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public ResponseEntity<Void> delete(@PathVariable String id) {
+        productBatchService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
 }

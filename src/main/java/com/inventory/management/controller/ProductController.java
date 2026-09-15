@@ -25,6 +25,11 @@ public class ProductController {
         return ResponseEntity.ok(productService.getAllProducts());
     }
 
+    @GetMapping("/restocking")
+    public ResponseEntity<List<Product>> getProductsNeedingRestock() {
+        return ResponseEntity.ok(productService.getProductsNeedingRestock());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable String id) {
         return ResponseEntity.ok(productService.getProductById(id));

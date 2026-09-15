@@ -57,7 +57,18 @@ public class McpService {
                 "PUT", "/api/invoices/{invoiceNo}", true);
         addInvoiceTool(tools, "delete_invoice", "Delete an invoice. Requires ADMIN role.", "DELETE",
                 "/api/invoices/{invoiceNo}", true);
+        addReadTool(tools, "get_products_needing_restock", "List products at or below their critical stock quantity.");
+        addReadTool(tools, "get_expiring_before", "List product batches expiring before a date.");
         return result;
+    }
+
+        private void addReadTool(ArrayNode tools, String name, String description) {
+        ObjectNode tool = tools.addObject().put("name", name).put("description", description);
+        ObjectNode properties = tool.putObject("inputSchema").putObject("properties");
+        if (name.equals("get_expiring_before")) {
+            properties.putObject("before").put("type", "string").put("format", "date");
+            tool.with("inputSchema").putArray("required").add("before");
+        }
     }
 
     private void addInvoiceTool(ArrayNode tools, String name, String description, String method, String path,
@@ -76,11 +87,21 @@ public class McpService {
 
     private ObjectNode callTool(JsonNode params, String authorizationHeader) {
         String name = params.path("name").asText();
-        if (!name.matches("create_invoice|update_invoice|delete_invoice")) {
+        if (!name.matches("create_invoice|update_invoice|delete_invoice|get_products_needing_restock|get_expiring_before")) {
             return toolError("Unknown tool: " + name);
         }
 
         JsonNode arguments = params.path("arguments");
+        if (name.equals("get_products_needing_restock") || name.equals("get_expiring_before")) {
+            String before = arguments.path("before").asText("");
+            if (name.equals("get_expiring_before") && before.isBlank()) {
+                return toolError("before is required");
+            }
+            String path = name.equals("get_products_needing_restock")
+                    ? "/api/products/restocking"
+                    : "/api/product-batches/expiring?before=" + before;
+            return executeGet(path, authorizationHeader);
+        }
         String method = name.equals("create_invoice") ? "POST" : name.equals("update_invoice") ? "PUT" : "DELETE";
         String path = "/api/invoices";
         if (!"create_invoice".equals(name)) {
@@ -99,6 +120,19 @@ public class McpService {
             }
             if (arguments.has("invoice") && !arguments.get("invoice").isNull()) {
                 request.contentType(MediaType.APPLICATION_JSON).body(arguments.get("invoice"));
+            }
+            String response = request.retrieve().body(String.class);
+            return toolResult(response == null ? "" : response);
+        } catch (Exception exception) {
+            return toolError(exception.getMessage() == null ? "Request failed" : exception.getMessage());
+        }
+    }
+
+    private ObjectNode executeGet(String path, String authorizationHeader) {
+        try {
+            RestClient.RequestHeadersSpec<?> request = restClient.get().uri(apiBaseUrl + path);
+            if (authorizationHeader != null && !authorizationHeader.isBlank()) {
+                request.header(HttpHeaders.AUTHORIZATION, authorizationHeader);
             }
             String response = request.retrieve().body(String.class);
             return toolResult(response == null ? "" : response);

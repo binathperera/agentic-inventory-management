@@ -20,4 +20,7 @@ public class ProductDTO {
     @NotNull(message = "Quantity is required")
     @PositiveOrZero(message = "Quantity must be zero or positive")
     private Integer remainingQuantity;
+    @NotNull(message = "Critical stock quantity is required")
+    @PositiveOrZero(message = "Critical stock quantity must be zero or positive")
+    private Integer criticalStockQuantity;
 }

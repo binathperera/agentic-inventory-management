@@ -23,6 +23,8 @@ public class Product {
     private String latestBatchNo;
     @Field("remaining_quantity")
     private Integer remainingQuantity;
+    @Field("critical_stock_quantity")
+    private Integer criticalStockQuantity;
     @Field("latest_unit_price")
     private float latestUnitPrice;
     @CreatedDate
@@ -32,10 +34,13 @@ public class Product {
     @Field("updated_at")
     private Instant updatedAt;
     @Field("schema_version")
-    private int schemaVersion = 1;
+    private int schemaVersion = 2;
 
+    public Product(){
+        
+    }
     public Product(String tenantId, String id, String name, String latestBatchNo, Integer remainingQuantity,
-            float latestUnitPrice) {
+            Integer criticalStockQuantity, float latestUnitPrice) {
         if (tenantId == null || tenantId.isEmpty()) {
             throw new IllegalArgumentException("tenantId cannot be null or empty");
         }
@@ -51,6 +56,9 @@ public class Product {
         if (remainingQuantity == null || remainingQuantity < 0) {
             throw new IllegalArgumentException("remainingQuantity cannot be null or negative");
         }
+        if (criticalStockQuantity == null || criticalStockQuantity < 0) {
+            throw new IllegalArgumentException("criticalStockQuantity cannot be null or negative");
+        }
         if (latestUnitPrice < 0) {
             throw new IllegalArgumentException("latestUnitPrice cannot be negative");
         }
@@ -59,6 +67,7 @@ public class Product {
         this.name = name;
         this.latestBatchNo = latestBatchNo;
         this.remainingQuantity = remainingQuantity;
+        this.criticalStockQuantity = criticalStockQuantity;
         this.latestUnitPrice = latestUnitPrice;
     }
 }

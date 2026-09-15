@@ -134,9 +134,9 @@ public class SampleDataLoader implements CommandLineRunner {
                 System.out.println("Loading sample products...");
                 try {
                     // Add sample products if needed
-                    productRepository.save(new Product(tenant1.getId(), "P001", "Product 1", "BATCH001", 100, 10.5f));
-                    productRepository.save(new Product(tenant1.getId(), "P002", "Product 2", "BATCH002", 200, 20.0f));
-                    productRepository.save(new Product(tenant1.getId(), "P003", "Product 3", "BATCH003", 150, 15.75f));
+                    productRepository.save(new Product(tenant1.getId(), "P001", "Product 1", "BATCH001",5, 10, 10.5f));
+                    productRepository.save(new Product(tenant1.getId(), "P002", "Product 2", "BATCH002", 200,10, 20.0f));
+                    productRepository.save(new Product(tenant1.getId(), "P003", "Product 3", "BATCH003", 150,20, 15.75f));
                     System.out.println("✓ Sample products created");
                 } catch (Exception e) {
                     System.err.println("✗ Error creating products: " + e.getMessage());
@@ -173,21 +173,21 @@ public class SampleDataLoader implements CommandLineRunner {
                 System.out.println("Loading sample product batches...");
                 try {
                     // Batches for INV-2025-001
-                    productBatchRepository.save(new ProductBatch(
+                    saveSampleProductBatch(new ProductBatch(
                             tenant1.getId(), "P001", "INV-2025-001", "BATCH001", 50, 8.0f, 10.5f, LocalDate.of(2026, 1, 15)));
-                    productBatchRepository.save(new ProductBatch(
+                    saveSampleProductBatch(new ProductBatch(
                             tenant1.getId(), "P002", "INV-2025-001", "BATCH002", 100, 15.0f, 20.0f, LocalDate.of(2026, 2, 15)));
 
                     // Batches for INV-2025-002
-                    productBatchRepository.save(new ProductBatch(
+                    saveSampleProductBatch(new ProductBatch(
                             tenant1.getId(), "P001", "INV-2025-002", "BATCH004", 75, 8.5f, 10.5f, LocalDate.of(2026, 3, 10)));
-                    productBatchRepository.save(new ProductBatch(
+                    saveSampleProductBatch(new ProductBatch(
                             tenant1.getId(), "P003", "INV-2025-002", "BATCH003", 80, 12.0f, 15.75f, LocalDate.of(2026, 4, 10)));
 
                     // Batches for INV-2025-003
-                    productBatchRepository.save(new ProductBatch(
+                    saveSampleProductBatch(new ProductBatch(
                             tenant1.getId(), "P002", "INV-2025-003", "BATCH005", 120, 16.0f, 20.0f, LocalDate.of(2026, 5, 5)));
-                    productBatchRepository.save(new ProductBatch(
+                    saveSampleProductBatch(new ProductBatch(
                             tenant1.getId(), "P003", "INV-2025-003", "BATCH006", 60, 13.0f, 15.75f, LocalDate.of(2026, 6, 5)));
                     System.out.println("✓ Sample product batches created");
                 } catch (Exception e) {
@@ -259,5 +259,16 @@ public class SampleDataLoader implements CommandLineRunner {
             System.err.println("✗ Fatal error in SampleDataLoader: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private void saveSampleProductBatch(ProductBatch batch) {
+        productBatchRepository.save(batch);
+        Product product = productRepository.findById(batch.getProductId())
+                .filter(candidate -> batch.getTenantId().equals(candidate.getTenantId()))
+                .orElseThrow(() -> new IllegalStateException("Product not found: " + batch.getProductId()));
+        int currentQuantity = product.getRemainingQuantity() == null ? 0 : product.getRemainingQuantity();
+        int batchQuantity = batch.getQty() == null ? 0 : batch.getQty();
+        product.setRemainingQuantity(currentQuantity + batchQuantity);
+        productRepository.save(product);
     }
 }
