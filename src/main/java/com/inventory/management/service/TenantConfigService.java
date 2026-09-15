@@ -124,29 +124,24 @@ public class TenantConfigService {
             throw new IllegalArgumentException("Tenant ID cannot be null or blank");
         }
 
-        if (tenantConfigRepository.existsByTenantId(tenantId)) {
-            // If config already exists, return it instead of throwing error
-            return tenantConfigRepository.findByTenantId(tenantId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Config not found for tenant: " + tenantId));
-        }
-
-        TenantConfig config = new TenantConfig();
+        TenantConfig config = tenantConfigRepository.findByTenantId(tenantId)
+            .orElseGet(TenantConfig::new);
         config.setTenantId(tenantId);
 
         // Set default brand
         TenantConfig.Brand brand = new TenantConfig.Brand();
         brand.setName("Default Brand");
-        brand.setPrimaryColor("#1976d2");
-        brand.setSecondaryColor("#dc004e");
-        brand.setFontFamily("Roboto, sans-serif");
+        brand.setPrimaryColor("#007c83");
+        brand.setSecondaryColor("#102a43");
+        brand.setFontFamily("Aptos, Segoe UI, sans-serif");
         config.setBrand(brand);
 
         // Set default UI theme
         TenantConfig.UiTheme uiTheme = new TenantConfig.UiTheme();
         uiTheme.setMode("light");
-        uiTheme.setAccentColor("#f50057");
+        uiTheme.setAccentColor("#007c83");
         uiTheme.setLayoutStyle("comfortable");
-        uiTheme.setCornerStyle("rounded");
+        uiTheme.setCornerStyle("sharp");
         config.setUiTheme(uiTheme);
 
         // Set default localization
